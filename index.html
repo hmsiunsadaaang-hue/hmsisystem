@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Aplikasi HMSI</title>
+  <title>Aplikasi HMSI - Web Portal</title>
   <link rel="icon" type="image/png" href="logo-hmsi.png" />
   <style>
     :root {
@@ -34,19 +34,23 @@
       overflow-x: hidden;
     }
 
-    /* Container ukuran layar mobile agar 100% sama seperti di Android */
+    /* Container Web Lebar agar kotak menu bisa berjejer ke samping dengan leluasa */
     #rootContainer {
       width: 100%;
-      max-width: 480px;
+      max-width: 1140px;
       min-height: 100vh;
       background-color: var(--color-bg);
-      padding: 24px 18px 48px 18px;
+      padding: 28px 24px 56px 24px;
       display: flex;
       flex-direction: column;
     }
 
+    /* Wrapper khusus Login agar tetap fokus dan rapi di tengah layar */
     .login-wrapper {
-      padding: 42px 10px 24px 10px;
+      width: 100%;
+      max-width: 440px;
+      margin: 36px auto;
+      padding: 24px 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -54,18 +58,18 @@
 
     /* Bingkai Lingkaran Emas untuk Logo HMSI di Halaman Login */
     .logo-circle-frame {
-      width: 118px;
-      height: 118px;
+      width: 124px;
+      height: 124px;
       border-radius: 50%;
       background-color: var(--color-card);
-      border: 3px solid var(--color-yellow);
+      border: 3.5px solid var(--color-yellow);
       padding: 6px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
     }
 
     .logo-circle-frame img {
@@ -76,18 +80,28 @@
     }
 
     .logo-fallback-emoji {
-      font-size: 46px;
+      font-size: 48px;
       line-height: 1;
+    }
+
+    /* Top Header & Balance Row berjejer di layar lebar */
+    .top-dashboard-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 6px;
     }
 
     .card {
       background-color: var(--color-card);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 14px;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
       width: 100%;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     }
 
     .card.red-card {
@@ -96,9 +110,10 @@
 
     .item-box {
       background-color: var(--color-bg);
-      padding: 12px;
-      margin: 5px 0;
-      border-radius: 8px;
+      padding: 14px;
+      margin: 6px 0;
+      border-radius: 10px;
+      border: 1px solid #334155;
       display: flex;
       flex-direction: column;
     }
@@ -115,9 +130,9 @@
       background-color: var(--color-bg);
       color: var(--color-text);
       border: 1px solid #334155;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 14px;
-      margin: 5px 0;
+      margin: 6px 0;
       font-size: 14px;
       outline: none;
     }
@@ -135,9 +150,9 @@
       background-color: var(--color-secondary-btn);
       color: var(--color-text);
       border: 1px solid #475569;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 13px 12px;
-      margin: 5px 0;
+      margin: 6px 0;
       font-size: 14px;
       outline: none;
       cursor: pointer;
@@ -149,18 +164,23 @@
       color: var(--color-yellow);
       font-weight: 700;
       border: none;
-      border-radius: 6px;
-      padding: 13px 14px;
+      border-radius: 8px;
+      padding: 13px 16px;
       margin: 6px 0;
       font-size: 13.5px;
       cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 0.4px;
       text-align: center;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
     }
 
     .btn-primary:active {
-      opacity: 0.85;
+      transform: scale(0.99);
     }
 
     .btn-secondary {
@@ -168,45 +188,54 @@
       background-color: var(--color-secondary-btn);
       color: var(--color-text);
       font-weight: 500;
-      border: none;
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin: 4px 0;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 5px 0;
       font-size: 13.5px;
       cursor: pointer;
       text-align: center;
+      transition: background-color 0.15s ease;
     }
 
-    .btn-secondary:active {
-      opacity: 0.85;
+    .btn-secondary:hover {
+      background-color: #3f4f66;
     }
 
     .btn-row {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       width: 100%;
-      margin: 4px 0;
+      margin: 6px 0;
+      flex-wrap: wrap;
     }
 
     .btn-row > button {
       flex: 1;
+      min-width: 180px;
     }
 
-    /* Grid Menu 1:1 identik dengan createSquareGridMenu di Android */
+    /* =========================================================================
+       GRID MENU KOTAK 1:1 BERJEJER KE SAMPING (HORIZONTAL ROW LAYOUT)
+       ========================================================================= */
     .square-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-bottom: 14px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
       width: 100%;
+      justify-content: flex-start;
     }
 
     .square-tile {
+      width: 165px;
+      height: 165px;
       aspect-ratio: 1 / 1;
       background-color: var(--color-card);
-      border: 2px solid var(--color-yellow);
-      border-radius: 16px;
-      padding: 12px;
+      border: 2.5px solid var(--color-yellow);
+      border-radius: 22px;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -214,15 +243,22 @@
       cursor: pointer;
       user-select: none;
       text-align: center;
-      transition: transform 0.1s ease;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .square-tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(234, 179, 8, 0.2);
+      border-color: #fde047;
     }
 
     .square-tile:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
 
     .square-tile .tile-icon {
-      font-size: 36px;
+      font-size: 40px;
       line-height: 1.1;
     }
 
@@ -233,6 +269,35 @@
       margin-top: 12px;
       white-space: pre-line;
       line-height: 1.3;
+    }
+
+    /* Responsif di layar HP: tetap berjejer ke samping (3 atau 2 kotak per baris) */
+    @media (max-width: 640px) {
+      #rootContainer {
+        padding: 18px 14px 40px 14px;
+      }
+      .square-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 12px;
+      }
+      .square-tile {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+    }
+
+    /* Grid untuk daftar kartu user agar ikut berjejer rapi di layar lebar */
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .users-grid .card {
+      margin-bottom: 0;
     }
 
     /* Baris Checklist Monitoring Piket */
@@ -261,7 +326,7 @@
     /* Preview Foto Live Camera */
     .img-preview {
       width: 100%;
-      max-height: 320px;
+      max-height: 340px;
       object-fit: contain;
       margin: 8px 0;
       border-radius: 8px;
@@ -315,7 +380,7 @@
       border: 1px solid var(--color-yellow);
       border-radius: 14px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       padding: 20px;
       display: flex;
       flex-direction: column;
@@ -413,13 +478,13 @@
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxABXFr7yxuVMGqnIs5CHf2IIPmNKEkZtO4VJSgz7TpgXlA4-WLus1RNez9pFsemQBDw/exec";
 
-    // Prioritas pertama: nama file yang sudah kamu upload di repo hmsisystem + fallback raw GitHub langsung
+    // Urutan prioritas file logo di repositori GitHub hmsiunsadaaang-hue/hmsisystem
     const LOGO_CANDIDATES = [
-      "./logo-hmsi.png",
-      "./logo_hmsi.png",
+      "logo-hmsi.png",
+      "logo_hmsi.png",
       "https://raw.githubusercontent.com/hmsiunsadaaang-hue/hmsisystem/main/logo-hmsi.png",
       "https://raw.githubusercontent.com/hmsiunsadaaang-hue/hmsisystem/main/logo_hmsi.png",
-      "./logo.png"
+      "logo.png"
     ];
 
     const ApiService = {
@@ -713,7 +778,6 @@
       imgLogo.alt = "Logo HMSI";
       let candidateIndex = 0;
 
-      // Pasang handler onerror SEBELUM mengisi src agar fallback berurutan berjalan sempurna
       imgLogo.onerror = function() {
         candidateIndex++;
         if (candidateIndex < LOGO_CANDIDATES.length) {
@@ -811,31 +875,37 @@
     }
 
     // =========================================================================
-    // 2. LAYAR DASHBOARD UTAMA (KOTAK GRID 1:1 DENGAN LOGO & NAMA MENU)
+    // 2. LAYAR DASHBOARD UTAMA (KOTAK GRID 1:1 BERJEJER KE SAMPING)
     // =========================================================================
     function showDashboardScreen(pushHistory = true) {
       setScreenState("DASHBOARD", pushHistory);
       rootContainer.innerHTML = "";
 
-      const headerCard = createCardLayout();
-      headerCard.appendChild(createLabel(`Halo, ${currentUserName} (@${currentUserUsername}) 👋`, 19, COLOR_YELLOW, true));
-      headerCard.appendChild(createLabel(`${currentUserRole} • ${currentUserDivisi}`, 13, COLOR_MUTED, false));
-      rootContainer.appendChild(headerCard);
+      const topRow = document.createElement("div");
+      topRow.className = "top-dashboard-row";
 
-      const bannerAlertBox = buildQuickReminderBanner();
-      if (bannerAlertBox) {
-        rootContainer.appendChild(bannerAlertBox);
-      }
+      const headerCard = createCardLayout();
+      headerCard.style.justifyContent = "center";
+      headerCard.appendChild(createLabel(`Halo, ${currentUserName} (@${currentUserUsername}) 👋`, 20, COLOR_YELLOW, true));
+      headerCard.appendChild(createLabel(`${currentUserRole} • ${currentUserDivisi}`, 14, COLOR_MUTED, false));
+      topRow.appendChild(headerCard);
 
       const balanceCard = createCardLayout(COLOR_RED);
       balanceCard.appendChild(createLabel("SALDO KAS ORGANISASI HMSI (LIVE)", 12, COLOR_YELLOW, true));
       balanceCard.appendChild(createLabel("Starting Balance (Otomatis +Kas/+Denda -Pengeluaran):", 12, COLOR_TEXT, false));
       balanceCard.appendChild(createLabel(formatRupiah(startingBalance), 24, COLOR_YELLOW, true));
       balanceCard.appendChild(createLabel(`Ending Balance: ${formatRupiah(endingBalance)}`, 14, COLOR_TEXT, true));
-      rootContainer.appendChild(balanceCard);
+      topRow.appendChild(balanceCard);
 
-      const lblPilih = createLabel("PILIH MENU UTAMA", 15, COLOR_YELLOW, true);
-      lblPilih.style.padding = "6px 2px 10px 2px";
+      rootContainer.appendChild(topRow);
+
+      const bannerAlertBox = buildQuickReminderBanner();
+      if (bannerAlertBox) {
+        rootContainer.appendChild(bannerAlertBox);
+      }
+
+      const lblPilih = createLabel("PILIH MENU UTAMA", 16, COLOR_YELLOW, true);
+      lblPilih.style.padding = "8px 2px 12px 2px";
       rootContainer.appendChild(lblPilih);
 
       const menuItems = [];
@@ -864,11 +934,14 @@
 
       rootContainer.appendChild(createSquareGridMenu(menuItems));
 
-      rootContainer.appendChild(createSecondaryButton("🔄 Sinkronisasi Data & Cek Notifikasi", () => {
+      const bottomBtnRow = document.createElement("div");
+      bottomBtnRow.className = "btn-row";
+      bottomBtnRow.appendChild(createSecondaryButton("🔄 Sinkronisasi Data & Cek Notifikasi", () => {
         toast("Menyinkronkan data...");
         refreshAllDataAndShow(false, () => showDashboardScreen(false));
       }));
-      rootContainer.appendChild(createSecondaryButton("🚪 Keluar Akun (Logout)", () => showLoginScreen()));
+      bottomBtnRow.appendChild(createSecondaryButton("🚪 Keluar Akun (Logout)", () => showLoginScreen()));
+      rootContainer.appendChild(bottomBtnRow);
     }
 
     function buildQuickReminderBanner() {
@@ -1057,7 +1130,7 @@
     }
 
     // =========================================================================
-    // 3. HUB MODUL ACCOUNTING (DIBAGI MENJADI 6 ANAK MENU KOTAK 1:1)
+    // 3. HUB MODUL ACCOUNTING (6 ANAK MENU KOTAK 1:1 BERJEJER KE SAMPING)
     // =========================================================================
     function showAccountingHubScreen(pushHistory = true) {
       setScreenState("ACCOUNTING_HUB", pushHistory);
@@ -1106,6 +1179,9 @@
       if (!isEditor) {
         rootContainer.appendChild(createLabel("Hanya Bendahara / Super Admin yang dapat mengubah Starting Balance secara manual.", 14, COLOR_MUTED, false));
       } else {
+        const topFormsRow = document.createElement("div");
+        topFormsRow.className = "top-dashboard-row";
+
         const setCard = createCardLayout();
         setCard.appendChild(createLabel("1. Tetapkan Nilai Starting Balance Baru", 16, COLOR_YELLOW, true));
         const etSet = createInput("Masukkan nominal Starting Balance (Rp)", false, true);
@@ -1128,7 +1204,7 @@
         });
         setCard.appendChild(etSet);
         setCard.appendChild(btnSet);
-        rootContainer.appendChild(setCard);
+        topFormsRow.appendChild(setCard);
 
         const addCard = createCardLayout();
         addCard.appendChild(createLabel("2. Tambah Dana Manual ke Starting Balance (+)", 16, COLOR_YELLOW, true));
@@ -1151,7 +1227,9 @@
         });
         addCard.appendChild(etAdd);
         addCard.appendChild(btnAdd);
-        rootContainer.appendChild(addCard);
+        topFormsRow.appendChild(addCard);
+
+        rootContainer.appendChild(topFormsRow);
       }
 
       const historyCard = createCardLayout();
@@ -1177,7 +1255,7 @@
           itemBox.className = "item-box";
           itemBox.appendChild(createLabel(`📅 Tanggal: ${tgl} (Oleh: ${by})`, 13, COLOR_YELLOW, true));
           itemBox.appendChild(createLabel(`Transaksi: ${mode} (${signSymbol}${formatRupiah(inpAmt)})`, 13, COLOR_TEXT, true));
-          itemBox.appendChild(createLabel(`Saldo Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}", 13, badgeColor, true));
+          itemBox.appendChild(createLabel(`Saldo Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}`, 13, badgeColor, true));
           historyCard.appendChild(itemBox);
         });
       }
@@ -2481,6 +2559,9 @@
       lblDaftar.style.padding = "6px 2px 10px 2px";
       rootContainer.appendChild(lblDaftar);
 
+      const usersGridContainer = document.createElement("div");
+      usersGridContainer.className = "users-grid";
+
       usersList.forEach((u) => {
         const uid = getUserIdSmart(u);
         const uName = getUserNameSmart(u);
@@ -2517,8 +2598,10 @@
         uCard.appendChild(spRole);
         uCard.appendChild(etNewPass);
         uCard.appendChild(btnSaveUser);
-        rootContainer.appendChild(uCard);
+        usersGridContainer.appendChild(uCard);
       });
+
+      rootContainer.appendChild(usersGridContainer);
     }
 
     // =========================================================================
@@ -2829,7 +2912,7 @@
     }
 
     // =========================================================================
-    // HELPER UI BUILDER (IDENTIK DENGAN FUNGSI HELPER DI MainActivity.kt)
+    // HELPER UI BUILDER (KOTAK MENU 1:1 BERJEJER HORIZONTAL)
     // =========================================================================
     function createSquareGridMenu(items) {
       const grid = document.createElement("div");
