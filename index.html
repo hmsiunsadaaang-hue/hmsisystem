@@ -476,7 +476,7 @@
     // =========================================================================
     // KONFIGURASI API SERVICE & LOGO GITHUB (SESUAI REPO hmsisystem)
     // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFtHPvg7bcvAufSiDnUYdAh55Uox_nptd9KmU4bdX3s_WsIdr_yq6jPn0WYX03vJeFvg/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCPLMFQcn3mo44mp1l5tu62L61PRnMhUvxnNYOUbN_tcTyxP0gfnsHF3vYECtxt2mImQ/exec";
 
     // Urutan prioritas file logo di repositori GitHub hmsiunsadaaang-hue/hmsisystem
     const LOGO_CANDIDATES = [
@@ -692,7 +692,7 @@
         triggerBrowserNotification(
           "HMSI_PIKET_ALERT",
           `⚠️ PENGINGAT PIKET HARI INI (${todayStr})`,
-          `Halo ${currentUserName}! Kamu terjadwal piket hari ini dan BELUM mengirim absen Foto After. Segera piket agar tidak terkena denda Rp 20.000!`
+          `Halo ${currentUserName}! Batas maksimal piket adalah jam 20:00 WIB (8 Malam). Segera upload Foto After agar tidak terkena denda otomatis Rp 20.000!`
         );
       }
 
@@ -721,7 +721,7 @@
         triggerBrowserNotification(
           "HMSI_KAS_ALERT",
           `💵 Tagihan Uang Kas Bulan ${currentMonthName}`,
-          `Halo ${currentUserName}, kamu belum membayar Uang Kas HMSI bulan ${currentMonthName} (Rp 10.000). Yuk segera upload bukti pembayaran!`
+          `Halo ${currentUserName}, kamu belum membayar Uang Kas HMSI bulan ${currentMonthName} (Rp 20.000). Yuk segera upload bukti pembayaran!`
         );
 
         if (showPopupIfUnpaidKas && !hasShownInitialKasPopup) {
@@ -763,7 +763,7 @@
       const msgEl = document.getElementById("kasAlertMessage");
       msgEl.textContent =
         `Halo ${currentUserName}!\n\n` +
-        `Sistem mendeteksi kamu BELUM membayar Uang Kas bulan ${monthName} (Rp 10.000).\n` +
+        `Sistem mendeteksi kamu BELUM membayar Uang Kas bulan ${monthName} (Rp 20.000).\n` +
         `Status saat ini: ${statusText}.\n\n` +
         `Silakan lakukan pembayaran dan unggah bukti transfer di menu Uang Kas.`;
 
@@ -1034,13 +1034,13 @@
       card.style.border = `1.5px solid ${COLOR_YELLOW}`;
       card.appendChild(createLabel("🔔 PENGINGAT AKTIF UNTUK KAMU:", 14, COLOR_YELLOW, true));
       if (needPiketToday) {
-        const pLbl = createLabel(`• ⚠️ Kamu terjadwal PIKET HARI INI (${todayStr}) dan belum kirim Foto After! Klik di sini untuk Absen Piket.`, 13, COLOR_RED, true);
+        const pLbl = createLabel(`• ⚠️ Kamu terjadwal PIKET HARI INI (${todayStr}) dan belum kirim Foto After! Maksimal piket jam 20:00 WIB sebelum kena denda otomatis Rp 20.000. Klik di sini untuk Absen Piket.`, 13, COLOR_RED, true);
         pLbl.style.cursor = "pointer";
         pLbl.onclick = () => showAbsenPiketScreen();
         card.appendChild(pLbl);
       }
       if (!kasPaidOrPending) {
-        const kLbl = createLabel(`• 💵 Kamu BELUM membayar Uang Kas bulan ${currentMonthName} (Rp 10.000). Segera upload bukti bayar di menu Uang Kas.`, 13, COLOR_YELLOW, true);
+        const kLbl = createLabel(`• 💵 Kamu BELUM membayar Uang Kas bulan ${currentMonthName} (Rp 20.000). Segera upload bukti bayar di menu Uang Kas.`, 13, COLOR_YELLOW, true);
         kLbl.style.cursor = "pointer";
         kLbl.onclick = () => showUangKasScreen();
         card.appendChild(kLbl);
@@ -1060,7 +1060,7 @@
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
       rootContainer.appendChild(createLabel("JADWAL PIKET HMSI", 22, COLOR_YELLOW, true));
-      rootContainer.appendChild(createLabel("Menu informasi jadwal piket untuk seluruh anggota HMSI:", 13, COLOR_MUTED, false));
+      rootContainer.appendChild(createLabel("Ketentuan Ketua: Batas maksimal absen piket adalah pukul 20:00 WIB (8 Malam) pada hari jadwal piket.", 13, COLOR_MUTED, false));
 
       const myScheduleCard = createCardLayout();
       myScheduleCard.appendChild(createLabel(`📌 Jadwal Piket Saya (${currentUserName})`, 17, COLOR_YELLOW, true));
@@ -1096,7 +1096,7 @@
 
           const rowBox = document.createElement("div");
           rowBox.className = "item-box";
-          rowBox.appendChild(createLabel(`📅 Tanggal: ${tglNorm} ${isToday ? "(HARI INI!)" : ""}`, 14, badgeColor, true));
+          rowBox.appendChild(createLabel(`📅 Tanggal: ${tglNorm} ${isToday ? "(HARI INI - Maks 20:00 WIB!)" : ""}`, 14, badgeColor, true));
           rowBox.appendChild(createLabel(`Divisi: ${div} | Status: ${statusPiketSaya}`, 13, COLOR_TEXT, false));
 
           if (isToday && !isDone) {
@@ -1448,7 +1448,7 @@
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
       rootContainer.appendChild(createLabel("CEK STATUS KAS ANGGOTA", 20, COLOR_YELLOW, true));
-      rootContainer.appendChild(createLabel("Membandingkan daftar seluruh anggota di tab Users dengan pembayaran kas per bulan:", 13, COLOR_MUTED, false));
+      rootContainer.appendChild(createLabel("Membandingkan daftar seluruh anggota di tab Users dengan pembayaran kas per bulan (Rp 20.000/bulan):", 13, COLOR_MUTED, false));
 
       const filterCard = createCardLayout();
       filterCard.appendChild(createLabel("Pilih Bulan Pemeriksaan:", 14, COLOR_YELLOW, true));
@@ -1795,13 +1795,13 @@
       rootContainer.innerHTML = "";
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
-      rootContainer.appendChild(createLabel("MENU UANG KAS HMSI", 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(createLabel("MENU UANG KAS HMSI (RP 20.000)", 22, COLOR_YELLOW, true));
       rootContainer.appendChild(createPaymentInfoDisplayCard());
 
       const defaultMonthIdx = monthsList.findIndex((m) => m.toLowerCase() === getCurrentIndonesianMonthName().toLowerCase());
 
       const uploadCard = createCardLayout();
-      uploadCard.appendChild(createLabel("Form Upload Bukti Bayar Kas", 16, COLOR_YELLOW, true));
+      uploadCard.appendChild(createLabel("Form Upload Bukti Bayar Kas (Rp 20.000/Bulan)", 16, COLOR_YELLOW, true));
       const spBulan = createSpinner(monthsList);
       if (defaultMonthIdx >= 0) spBulan.selectedIndex = defaultMonthIdx;
 
@@ -1816,7 +1816,7 @@
         });
       });
 
-      const btnKirimKas = createPrimaryButton("KIRIM BUKTI UANG KAS", () => {
+      const btnKirimKas = createPrimaryButton("KIRIM BUKTI UANG KAS (RP 20.000)", () => {
         if (!buktiKasB64) {
           toast("Wajib mengunggah foto bukti pembayaran!");
           return;
@@ -2022,11 +2022,13 @@
       rootContainer.innerHTML = "";
 
       const todayStr = getTodayFormatted();
+      const currentHour = new Date().getHours();
+      const isPast8PM = currentHour >= 20;
       const displayUser = currentUserUsername || currentUserName;
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
       rootContainer.appendChild(createLabel("ABSENSI PIKET HARIAN", 22, COLOR_YELLOW, true));
-      rootContainer.appendChild(createLabel(`Tanggal Hari Ini: ${todayStr} (Wajib Live Camera + Watermark Lokasi & Jam Live)`, 13, COLOR_MUTED, false));
+      rootContainer.appendChild(createLabel(`Tanggal Hari Ini: ${todayStr} | Ketentuan Ketua: Maksimal Piket Jam 20:00 WIB (8 Malam)`, 13, COLOR_MUTED, false));
 
       let isScheduledToday = false;
       let collectiveBeforeUrl = "-";
@@ -2086,93 +2088,99 @@
       if (!isScheduledToday) {
         actionCard.appendChild(createLabel(`🔒 Kamu sedang tidak memiliki jadwal piket hari ini (${todayStr}). Tombol kamera dikunci.`, 14, COLOR_YELLOW, true));
       } else {
-        actionCard.appendChild(createLabel("✔ Kamu Terjadwal Piket Hari Ini!", 16, COLOR_GREEN, true));
+        const isAlreadySent = myAfterStatus.toLowerCase().includes("berhasil") || myAfterStatus.toLowerCase().includes("hadir") || myAfterStatus.toLowerCase().includes("checked");
 
-        actionCard.appendChild(createLabel(
-          `1. Foto BEFORE (Perwakilan 1 Orang Tim)\nStatus: ${collectiveBeforeUrl !== "-" ? "Sudah Diupload oleh " + collectiveBeforeBy : "Belum Diupload"}`,
-          13, COLOR_TEXT, false
-        ));
-        if (collectiveBeforeUrl && collectiveBeforeUrl.startsWith("http")) {
-          actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto BEFORE (Ber-Timestamp & GPS)", () => {
-            window.open(collectiveBeforeUrl, "_blank");
-          }));
-        }
+        if (isPast8PM && !isAlreadySent) {
+          actionCard.appendChild(createLabel("⏰ WAKTU PIKET HABIS (LEWAT PUKUL 20:00 WIB)!", 16, COLOR_RED, true));
+          actionCard.appendChild(createLabel("Sesuai aturan Ketua Organisasi, batas maksimal piket adalah jam 8 malam (20:00 WIB). Karena kamu belum menyelesaikan Foto After, kamu tercatat Alpha dan dikenakan Denda Rp 20.000.", 13, COLOR_TEXT, false));
+        } else {
+          actionCard.appendChild(createLabel("✔ Kamu Terjadwal Piket Hari Ini! (Batas: 20:00 WIB)", 16, COLOR_GREEN, true));
 
-        let pendingBeforeB64 = "";
-        const ivPreviewBefore = document.createElement("img");
-        ivPreviewBefore.className = "img-preview";
-
-        const btnKirimBefore = createPrimaryButton("📤 KIRIM FOTO BEFORE SEKARANG", () => {
-          if (!pendingBeforeB64) return;
-          toast("Mengunggah Foto BEFORE ke Google Drive...");
-          submitPiketPhoto("BEFORE", todayStr, pendingBeforeB64);
-        });
-        btnKirimBefore.style.display = "none";
-
-        actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO BEFORE", () => {
-          captureLiveCameraWithPreview((dataUrl, b64) => {
-            pendingBeforeB64 = b64;
-            ivPreviewBefore.src = dataUrl;
-            ivPreviewBefore.style.display = "block";
-            btnKirimBefore.style.display = "block";
-            toast("Foto BEFORE diambil beserta Timestamp & GPS! Klik tombol KIRIM di bawahnya.");
-          });
-        }));
-        actionCard.appendChild(ivPreviewBefore);
-        actionCard.appendChild(btnKirimBefore);
-
-        const isAlreadySent = myAfterStatus.toLowerCase().includes("berhasil") || myAfterStatus.toLowerCase().includes("hadir");
-        const formattedMyStatus = isAlreadySent
-          ? `absen berhasil di kirim terimakasih ${displayUser}`
-          : myAfterStatus;
-
-        actionCard.appendChild(createLabel("\n2. Foto AFTER (Wajib Masing-Masing Individu!)", 15, COLOR_YELLOW, true));
-        actionCard.appendChild(createLabel(`Status Kamu: ${formattedMyStatus}`, 14, isAlreadySent ? COLOR_GREEN : COLOR_YELLOW, true));
-        actionCard.appendChild(createLabel("⚠️ Peringatan: Selama belum kirim Foto After, notifikasi pengingat akan terus tampil & berisiko denda Rp 20.000!", 12, COLOR_MUTED, false));
-
-        if (myAfterUrl && myAfterUrl.startsWith("http")) {
-          actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto AFTER Kamu (Ber-Timestamp & GPS)", () => {
-            window.open(myAfterUrl, "_blank");
-          }));
-        }
-
-        let pendingAfterB64 = "";
-        const ivPreviewAfter = document.createElement("img");
-        ivPreviewAfter.className = "img-preview";
-        const tvPreviewInfo = createLabel("", 12, COLOR_GREEN, true);
-        tvPreviewInfo.style.display = "none";
-
-        const btnKirimAbsenAfter = createPrimaryButton("✅ KIRIM ABSEN PIKET SEKARANG", () => {
-          if (!pendingAfterB64) {
-            toast("Ambil Live Foto After terlebih dahulu!");
-            return;
+          actionCard.appendChild(createLabel(
+            `1. Foto BEFORE (Perwakilan 1 Orang Tim)\nStatus: ${collectiveBeforeUrl !== "-" ? "Sudah Diupload oleh " + collectiveBeforeBy : "Belum Diupload"}`,
+            13, COLOR_TEXT, false
+          ));
+          if (collectiveBeforeUrl && collectiveBeforeUrl.startsWith("http")) {
+            actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto BEFORE (Ber-Timestamp & GPS)", () => {
+              window.open(collectiveBeforeUrl, "_blank");
+            }));
           }
-          toast("Mengirim absen piket...");
-          submitPiketPhoto("AFTER", todayStr, pendingAfterB64);
-        });
-        btnKirimAbsenAfter.style.display = "none";
 
-        actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO AFTER", () => {
-          if (collectiveBeforeUrl === "-" && !pendingBeforeB64) {
-            toast("Tim piket harus mengunggah Foto Before terlebih dahulu!");
-            return;
-          }
-          captureLiveCameraWithPreview((dataUrl, b64) => {
-            pendingAfterB64 = b64;
-            ivPreviewAfter.src = dataUrl;
-            ivPreviewAfter.style.display = "block";
-            tvPreviewInfo.textContent = "✔ Foto Live + Watermark Tanggal, Jam & Lokasi GPS siap dikirim! Silakan klik tombol KIRIM ABSEN di bawah:";
-            tvPreviewInfo.style.display = "block";
-            btnKirimAbsenAfter.style.display = "block";
+          let pendingBeforeB64 = "";
+          const ivPreviewBefore = document.createElement("img");
+          ivPreviewBefore.className = "img-preview";
+
+          const btnKirimBefore = createPrimaryButton("📤 KIRIM FOTO BEFORE SEKARANG", () => {
+            if (!pendingBeforeB64) return;
+            toast("Mengunggah Foto BEFORE ke Google Drive...");
+            submitPiketPhoto("BEFORE", todayStr, pendingBeforeB64);
           });
-        }));
-        actionCard.appendChild(ivPreviewAfter);
-        actionCard.appendChild(tvPreviewInfo);
-        actionCard.appendChild(btnKirimAbsenAfter);
+          btnKirimBefore.style.display = "none";
+
+          actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO BEFORE", () => {
+            captureLiveCameraWithPreview((dataUrl, b64) => {
+              pendingBeforeB64 = b64;
+              ivPreviewBefore.src = dataUrl;
+              ivPreviewBefore.style.display = "block";
+              btnKirimBefore.style.display = "block";
+              toast("Foto BEFORE diambil beserta Timestamp & GPS! Klik tombol KIRIM di bawahnya.");
+            });
+          }));
+          actionCard.appendChild(ivPreviewBefore);
+          actionCard.appendChild(btnKirimBefore);
+
+          const formattedMyStatus = isAlreadySent
+            ? `absen berhasil di kirim terimakasih ${displayUser}`
+            : myAfterStatus;
+
+          actionCard.appendChild(createLabel("\n2. Foto AFTER (Wajib Masing-Masing Individu Sebelum 20:00 WIB!)", 15, COLOR_YELLOW, true));
+          actionCard.appendChild(createLabel(`Status Kamu: ${formattedMyStatus}`, 14, isAlreadySent ? COLOR_GREEN : COLOR_YELLOW, true));
+          actionCard.appendChild(createLabel("⚠️ Peringatan: Jika lewat jam 20:00 WIB belum kirim Foto After, sistem otomatis mencatat Denda Rp 20.000!", 12, COLOR_MUTED, false));
+
+          if (myAfterUrl && myAfterUrl.startsWith("http")) {
+            actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto AFTER Kamu (Ber-Timestamp & GPS)", () => {
+              window.open(myAfterUrl, "_blank");
+            }));
+          }
+
+          let pendingAfterB64 = "";
+          const ivPreviewAfter = document.createElement("img");
+          ivPreviewAfter.className = "img-preview";
+          const tvPreviewInfo = createLabel("", 12, COLOR_GREEN, true);
+          tvPreviewInfo.style.display = "none";
+
+          const btnKirimAbsenAfter = createPrimaryButton("✅ KIRIM ABSEN PIKET SEKARANG", () => {
+            if (!pendingAfterB64) {
+              toast("Ambil Live Foto After terlebih dahulu!");
+              return;
+            }
+            toast("Mengirim absen piket...");
+            submitPiketPhoto("AFTER", todayStr, pendingAfterB64);
+          });
+          btnKirimAbsenAfter.style.display = "none";
+
+          actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO AFTER", () => {
+            if (collectiveBeforeUrl === "-" && !pendingBeforeB64) {
+              toast("Tim piket harus mengunggah Foto Before terlebih dahulu!");
+              return;
+            }
+            captureLiveCameraWithPreview((dataUrl, b64) => {
+              pendingAfterB64 = b64;
+              ivPreviewAfter.src = dataUrl;
+              ivPreviewAfter.style.display = "block";
+              tvPreviewInfo.textContent = "✔ Foto Live + Watermark Tanggal, Jam & Lokasi GPS siap dikirim! Silakan klik tombol KIRIM ABSEN di bawah:";
+              tvPreviewInfo.style.display = "block";
+              btnKirimAbsenAfter.style.display = "block";
+            });
+          }));
+          actionCard.appendChild(ivPreviewAfter);
+          actionCard.appendChild(tvPreviewInfo);
+          actionCard.appendChild(btnKirimAbsenAfter);
+        }
       }
 
       if (isAccountingAccessRole()) {
-        actionCard.appendChild(createSecondaryButton("⚡ Proses Evaluasi Bolos Piket -> Denda Rp 20.000", () => {
+        actionCard.appendChild(createSecondaryButton("⚡ Proses Evaluasi Lewat 20:00 WIB -> Denda Rp 20.000", () => {
           ApiService.post({
             action: "triggerCheckDendaPiket",
             tanggalPiket: todayStr
