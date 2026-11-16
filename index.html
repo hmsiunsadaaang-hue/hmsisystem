@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Aplikasi HMSI</title>
-  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="icon" type="image/png" href="logo-hmsi.png" />
   <style>
     :root {
       --color-bg: #0F172A;
@@ -54,12 +54,12 @@
 
     /* Bingkai Lingkaran Emas untuk Logo HMSI di Halaman Login */
     .logo-circle-frame {
-      width: 112px;
-      height: 112px;
+      width: 118px;
+      height: 118px;
       border-radius: 50%;
       background-color: var(--color-card);
       border: 3px solid var(--color-yellow);
-      padding: 8px;
+      padding: 6px;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -71,7 +71,7 @@
     .logo-circle-frame img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       border-radius: 50%;
     }
 
@@ -269,31 +269,6 @@
       display: none;
     }
 
-    /* Sticky Bar Notifikasi Persistent di Atas Layar Web/HP */
-    #stickyNotifBar {
-      position: sticky;
-      top: 0;
-      z-index: 7777;
-      width: 100%;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .sticky-notif-item {
-      background-color: rgba(220, 38, 38, 0.96);
-      border: 1px solid var(--color-yellow);
-      color: var(--color-text);
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 12.5px;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-      cursor: pointer;
-      line-height: 1.35;
-    }
-
     /* Toast Android Style */
     #toastBox {
       position: fixed;
@@ -434,18 +409,17 @@
 
   <script>
     // =========================================================================
-    // KONFIGURASI API SERVICE & LOGO GITHUB (100% SAMA DENGAN ApiService.kt)
+    // KONFIGURASI API SERVICE & LOGO GITHUB (SESUAI REPO hmsisystem)
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxABXFr7yxuVMGqnIs5CHf2IIPmNKEkZtO4VJSgz7TpgXlA4-WLus1RNez9pFsemQBDw/exec";
 
-    // Daftar kandidat nama file logo yang bisa kamu upload ke repositori GitHub
+    // Prioritas pertama: nama file yang sudah kamu upload di repo hmsisystem + fallback raw GitHub langsung
     const LOGO_CANDIDATES = [
-      "logo.png",
-      "logo_hmsi.png",
-      "logo.jpg",
-      "logo.jpeg",
-      "ic_launcher.png",
-      "ic_launcher_round.png"
+      "./logo-hmsi.png",
+      "./logo_hmsi.png",
+      "https://raw.githubusercontent.com/hmsiunsadaaang-hue/hmsisystem/main/logo-hmsi.png",
+      "https://raw.githubusercontent.com/hmsiunsadaaang-hue/hmsisystem/main/logo_hmsi.png",
+      "./logo.png"
     ];
 
     const ApiService = {
@@ -511,7 +485,6 @@
       "April", "Mei", "Juni", "Juli", "Agustus", "September"
     ];
 
-    // Daftar Filter Bulan & Tahun Kalender (Persis filterCalendarMonths & filterCalendarYears di Android)
     const filterCalendarMonths = [
       ["Semua Bulan", "ALL"],
       ["Januari (01)", "01"],
@@ -532,7 +505,6 @@
 
     const rootContainer = document.getElementById("rootContainer");
 
-    // Inisialisasi GPS Lokasi, Notifikasi Browser, & Navigasi Back
     window.addEventListener("DOMContentLoaded", () => {
       requestNecessaryPermissions();
       setupBackNavigationHandler();
@@ -599,7 +571,6 @@
       if (!currentUserId && !currentUserName) return;
       const todayStr = getTodayFormatted();
 
-      // 1. CEK JADWAL PIKET HARI INI & STATUS FOTO AFTER
       let isScheduledToday = false;
       let hasCompletedPiketAfter = false;
 
@@ -642,7 +613,6 @@
         );
       }
 
-      // 2. CEK STATUS PEMBAYARAN UANG KAS BULAN BERJALAN
       const currentMonthName = getCurrentIndonesianMonthName();
       let kasStatusThisMonth = "BELUM BAYAR";
 
@@ -684,7 +654,7 @@
         try {
           new Notification(title, {
             body: body,
-            icon: "logo.png",
+            icon: "logo-hmsi.png",
             tag: tagId,
             requireInteraction: true
           });
@@ -695,7 +665,7 @@
             try {
               new Notification(title, {
                 body: body,
-                icon: "logo.png",
+                icon: "logo-hmsi.png",
                 tag: tagId,
                 requireInteraction: true
               });
@@ -726,7 +696,7 @@
     }
 
     // =========================================================================
-    // 1. LAYAR LOGIN (DENGAN BINGKAI LOGO HMSI OTOMATIS DARI GITHUB)
+    // 1. LAYAR LOGIN (MEMUAT logo-hmsi.png / logo_hmsi.png DARI REPO GITHUB)
     // =========================================================================
     function showLoginScreen() {
       setScreenState("LOGIN", false);
@@ -736,15 +706,15 @@
       const container = document.createElement("div");
       container.className = "login-wrapper";
 
-      // Bingkai Lingkaran Emas untuk Logo HMSI (Otomatis deteksi logo.png di GitHub)
       const iconFrame = document.createElement("div");
       iconFrame.className = "logo-circle-frame";
 
       const imgLogo = document.createElement("img");
       imgLogo.alt = "Logo HMSI";
       let candidateIndex = 0;
-      imgLogo.src = LOGO_CANDIDATES[candidateIndex];
-      imgLogo.onerror = () => {
+
+      // Pasang handler onerror SEBELUM mengisi src agar fallback berurutan berjalan sempurna
+      imgLogo.onerror = function() {
         candidateIndex++;
         if (candidateIndex < LOGO_CANDIDATES.length) {
           imgLogo.src = LOGO_CANDIDATES[candidateIndex];
@@ -752,6 +722,7 @@
           iconFrame.innerHTML = '<div class="logo-fallback-emoji">🏛️</div>';
         }
       };
+      imgLogo.src = LOGO_CANDIDATES[0];
       iconFrame.appendChild(imgLogo);
 
       const logoTitle = document.createElement("div");
@@ -872,8 +843,6 @@
         menuItems.push(["📊", "Accounting", () => showAccountingHubScreen()]);
       }
       menuItems.push(["💵", "Uang Kas", () => showUangKasScreen()]);
-
-      // MENU BARU UNTUK SEMUA USER: LIHAT JADWAL PIKET
       menuItems.push(["📆", "Jadwal Piket\n(Semua User)", () => showLihatJadwalPiketSemuaUserScreen()]);
 
       if (["Super Admin", "Ketua Organisasi", "Wakahim"].includes(currentUserRole)) {
@@ -988,7 +957,6 @@
       rootContainer.appendChild(createLabel("JADWAL PIKET HMSI", 22, COLOR_YELLOW, true));
       rootContainer.appendChild(createLabel("Menu informasi jadwal piket untuk seluruh anggota HMSI:", 13, COLOR_MUTED, false));
 
-      // KARTU 1: JADWAL PIKET SAYA SENDIRI
       const myScheduleCard = createCardLayout();
       myScheduleCard.appendChild(createLabel(`📌 Jadwal Piket Saya (${currentUserName})`, 17, COLOR_YELLOW, true));
       let myCount = 0;
@@ -1038,7 +1006,6 @@
       }
       rootContainer.appendChild(myScheduleCard);
 
-      // KARTU 2: JADWAL PIKET SELURUH ANGGOTA HMSI PER PERIODE BULAN
       const allScheduleCard = createCardLayout();
       allScheduleCard.appendChild(createLabel("🗓️ Daftar Jadwal Piket Seluruh Anggota", 17, COLOR_YELLOW, true));
 
@@ -1210,7 +1177,7 @@
           itemBox.className = "item-box";
           itemBox.appendChild(createLabel(`📅 Tanggal: ${tgl} (Oleh: ${by})`, 13, COLOR_YELLOW, true));
           itemBox.appendChild(createLabel(`Transaksi: ${mode} (${signSymbol}${formatRupiah(inpAmt)})`, 13, COLOR_TEXT, true));
-          itemBox.appendChild(createLabel(`Saldo Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}`, 13, badgeColor, true));
+          itemBox.appendChild(createLabel(`Saldo Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}", 13, badgeColor, true));
           historyCard.appendChild(itemBox);
         });
       }
@@ -2011,7 +1978,6 @@
       } else {
         actionCard.appendChild(createLabel("✔ Kamu Terjadwal Piket Hari Ini!", 16, COLOR_GREEN, true));
 
-        // 1. BAGIAN FOTO BEFORE (KOLEKTIF)
         actionCard.appendChild(createLabel(
           `1. Foto BEFORE (Perwakilan 1 Orang Tim)\nStatus: ${collectiveBeforeUrl !== "-" ? "Sudah Diupload oleh " + collectiveBeforeBy : "Belum Diupload"}`,
           13, COLOR_TEXT, false
@@ -2045,7 +2011,6 @@
         actionCard.appendChild(ivPreviewBefore);
         actionCard.appendChild(btnKirimBefore);
 
-        // 2. BAGIAN FOTO AFTER (WAJIB INDIVIDU + TOMBOL KIRIM ABSEN)
         const isAlreadySent = myAfterStatus.toLowerCase().includes("berhasil") || myAfterStatus.toLowerCase().includes("hadir");
         const formattedMyStatus = isAlreadySent
           ? `absen berhasil di kirim terimakasih ${displayUser}`
@@ -2455,7 +2420,6 @@
 
       const roles = ["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim", "User Biasa"];
 
-      // 1. KARTU FORM TAMBAH USER BARU
       const addUserCard = createCardLayout();
       addUserCard.appendChild(createLabel("➕ Buat Akun User Baru HMSI", 18, COLOR_YELLOW, true));
       addUserCard.appendChild(createLabel("ID User akan dibuat otomatis (contoh: USR-11) dan langsung tersimpan ke tab Users di Google Sheets:", 12, COLOR_MUTED, false));
@@ -2513,7 +2477,6 @@
       addUserCard.appendChild(btnCreateUser);
       rootContainer.appendChild(addUserCard);
 
-      // 2. DAFTAR KELOLA USER YANG SUDAH TERDAFTAR
       const lblDaftar = createLabel(`DAFTAR ANGGOTA TERDAFTAR (${usersList.length} AKUN)`, 16, COLOR_YELLOW, true);
       lblDaftar.style.padding = "6px 2px 10px 2px";
       rootContainer.appendChild(lblDaftar);
