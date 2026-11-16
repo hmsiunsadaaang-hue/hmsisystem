@@ -476,7 +476,7 @@
     // =========================================================================
     // KONFIGURASI API SERVICE & LOGO GITHUB (SESUAI REPO hmsisystem)
     // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxABXFr7yxuVMGqnIs5CHf2IIPmNKEkZtO4VJSgz7TpgXlA4-WLus1RNez9pFsemQBDw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFtHPvg7bcvAufSiDnUYdAh55Uox_nptd9KmU4bdX3s_WsIdr_yq6jPn0WYX03vJeFvg/exec";
 
     // Urutan prioritas file logo di repositori GitHub hmsiunsadaaang-hue/hmsisystem
     const LOGO_CANDIDATES = [
@@ -1378,7 +1378,7 @@
           const idKas = optSmart(item, "ID_Kas", "id_kas");
           const nama = optSmart(item, "Nama", "nama");
           const bulan = optSmart(item, "Bulan", "bulan");
-          const nom = Number(optSmart(item, "Nominal", "nominal")) || 10000;
+          const nom = Number(optSmart(item, "Nominal", "nominal")) || 20000;
           const bukti = optSmart(item, "URL_Bukti_Drive", "url_bukti_drive");
           const card = createCardLayout();
           card.appendChild(createVerificationRow("KAS", idKas, `UANG KAS: ${nama}\nBulan: ${bulan} • ${formatRupiah(nom)}`, bukti));
@@ -1826,7 +1826,7 @@
           userId: currentUserId,
           nama: currentUserName,
           bulan: spBulan.value,
-          nominal: 10000,
+          nominal: 20000,
           base64Image: buktiKasB64
         }, (res) => {
           toast(res.message || "Bukti Uang Kas terkirim");
