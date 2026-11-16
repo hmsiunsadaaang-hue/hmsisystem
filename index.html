@@ -570,6 +570,24 @@
 
     const rootContainer = document.getElementById("rootContainer");
 
+    // =========================================================================
+    // HELPER VALIDASI HAK AKSES ROLE (CASE-INSENSITIVE & SAMA DENGAN ANDROID)
+    // =========================================================================
+    function hasRole(...allowedRoles) {
+      const cleanRole = String(currentUserRole || "").trim().toLowerCase();
+      return allowedRoles.some((r) => String(r).trim().toLowerCase() === cleanRole);
+    }
+
+    // Super Admin, Ketua Organisasi, dan Wakahim memiliki akses ke SEMUA MENU
+    function isFullAccessRole() {
+      return hasRole("Super Admin", "Ketua Organisasi", "Wakahim");
+    }
+
+    // Super Admin, Ketua Organisasi, Wakahim, dan Bendahara memiliki akses ke Accounting
+    function isAccountingAccessRole() {
+      return isFullAccessRole() || hasRole("Bendahara");
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       requestNecessaryPermissions();
       setupBackNavigationHandler();
@@ -828,7 +846,8 @@
             currentUserName = optSmart(userObj, "nama", "name");
             const uname = optSmart(userObj, "username", "user");
             currentUserUsername = uname ? uname : u;
-            currentUserRole = optSmart(userObj, "role", "status");
+            const rawRole = optSmart(userObj, "role", "status") || "User Biasa";
+            currentUserRole = rawRole.toLowerCase() === "user basa" ? "User Biasa" : rawRole;
             currentUserDivisi = optSmart(userObj, "divisi", "divisi_jabatan");
             refreshAllDataAndShow(true, () => showDashboardScreen());
           } else {
@@ -875,7 +894,7 @@
     }
 
     // =========================================================================
-    // 2. LAYAR DASHBOARD UTAMA (KOTAK GRID 1:1 BERJEJER KE SAMPING)
+    // 2. LAYAR DASHBOARD UTAMA (SESUAI HAK AKSES ROLE)
     // =========================================================================
     function showDashboardScreen(pushHistory = true) {
       setScreenState("DASHBOARD", pushHistory);
@@ -909,26 +928,39 @@
       rootContainer.appendChild(lblPilih);
 
       const menuItems = [];
-      if (["Bendahara", "Ketua Organisasi", "Wakahim", "Super Admin"].includes(currentUserRole)) {
+
+      // 1. MENU ACCOUNTING: Super Admin, Ketua Organisasi, Wakahim, Bendahara
+      if (isAccountingAccessRole()) {
         menuItems.push(["📊", "Accounting", () => showAccountingHubScreen()]);
       }
+
+      // 2. MENU UANG KAS: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["💵", "Uang Kas", () => showUangKasScreen()]);
+
+      // 3. MENU JADWAL PIKET: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["📆", "Jadwal Piket\n(Semua User)", () => showLihatJadwalPiketSemuaUserScreen()]);
 
-      if (["Super Admin", "Ketua Organisasi", "Wakahim"].includes(currentUserRole)) {
+      // 4. MENU KELOLA JADWAL PIKET: Khusus Super Admin, Ketua Organisasi, Wakahim
+      if (isFullAccessRole()) {
         menuItems.push(["📅", "Kelola Jadwal\nPiket", () => showKelolaJadwalPiketScreen()]);
       }
 
+      // 5. MENU ABSEN PIKET: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["📸", "Absen Piket\n(Live Cam)", () => showAbsenPiketScreen()]);
+
+      // 6. MENU RIWAYAT ABSEN PIKET SAYA: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["🗂️", "Riwayat Absen\nPiket Saya", () => showRiwayatAbsenPiketUserScreen()]);
 
-      if (["Wakahim", "Ketua Organisasi", "Super Admin"].includes(currentUserRole)) {
+      // 7. MENU MONITORING PIKET: Khusus Super Admin, Ketua Organisasi, Wakahim
+      if (isFullAccessRole()) {
         menuItems.push(["☑️", "Monitoring\nPiket", () => showMonitoringPiketScreen()]);
       }
 
+      // 8. MENU DENDA: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["⚠️", "Menu Denda\n(Rp 20.000)", () => showDendaScreen()]);
 
-      if (["Super Admin", "Bendahara"].includes(currentUserRole)) {
+      // 9. MENU USER SETTING & PASSWORD: Khusus Super Admin, Ketua Organisasi, Wakahim
+      if (isFullAccessRole()) {
         menuItems.push(["⚙️", "User Setting\n& Password", () => showUserSettingScreen()]);
       }
 
@@ -1017,7 +1049,7 @@
     }
 
     // =========================================================================
-    // 2B. MENU BARU: JADWAL PIKET (DITAMPILKAN KE SEMUA USER + PENGINGAT)
+    // 2B. MENU: JADWAL PIKET (DITAMPILKAN KE SEMUA USER + PENGINGAT)
     // =========================================================================
     function showLihatJadwalPiketSemuaUserScreen() {
       setScreenState("LIHAT_JADWAL_PIKET_ALL");
@@ -1175,9 +1207,9 @@
       infoCard.appendChild(createLabel("Info: Pembayaran Kas & Denda yang disetujui otomatis menambah Starting Balance, dan semua Pengeluaran otomatis mengurangi Starting Balance.", 12, COLOR_YELLOW, false));
       rootContainer.appendChild(infoCard);
 
-      const isEditor = ["Bendahara", "Super Admin"].includes(currentUserRole);
+      const isEditor = isAccountingAccessRole();
       if (!isEditor) {
-        rootContainer.appendChild(createLabel("Hanya Bendahara / Super Admin yang dapat mengubah Starting Balance secara manual.", 14, COLOR_MUTED, false));
+        rootContainer.appendChild(createLabel("Hanya Super Admin, Ketua Organisasi, Wakahim, atau Bendahara yang dapat mengubah Starting Balance secara manual.", 14, COLOR_MUTED, false));
       } else {
         const topFormsRow = document.createElement("div");
         topFormsRow.className = "top-dashboard-row";
@@ -1871,7 +1903,7 @@
     }
 
     // =========================================================================
-    // 5. MODUL KELOLA JADWAL PIKET (ADMIN / KETUA / WAKAHIM)
+    // 5. MODUL KELOLA JADWAL PIKET (SUPER ADMIN / KETUA ORGANISASI / WAKAHIM)
     // =========================================================================
     function showKelolaJadwalPiketScreen() {
       setScreenState("JADWAL_PIKET");
@@ -2139,7 +2171,7 @@
         actionCard.appendChild(btnKirimAbsenAfter);
       }
 
-      if (["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim"].includes(currentUserRole)) {
+      if (isAccountingAccessRole()) {
         actionCard.appendChild(createSecondaryButton("⚡ Proses Evaluasi Bolos Piket -> Denda Rp 20.000", () => {
           ApiService.post({
             action: "triggerCheckDendaPiket",
@@ -2176,7 +2208,7 @@
     }
 
     // =========================================================================
-    // 6B. MENU BARU: RIWAYAT ABSEN PIKET SAYA (FILTER BULAN & TAHUN, AKSES SEMUA USER)
+    // 6B. MENU: RIWAYAT ABSEN PIKET SAYA (FILTER BULAN & TAHUN, AKSES SEMUA USER)
     // =========================================================================
     function showRiwayatAbsenPiketUserScreen() {
       setScreenState("RIWAYAT_PIKET_SAYA");
@@ -2292,7 +2324,7 @@
     }
 
     // =========================================================================
-    // 6C. MENU BARU: MONITORING PIKET DENGAN CHECKLIST (KHUSUS WAKAHIM, KETUA, SUPER ADMIN)
+    // 6C. MENU: MONITORING PIKET DENGAN CHECKLIST (KHUSUS WAKAHIM, KETUA, SUPER ADMIN)
     // =========================================================================
     function showMonitoringPiketScreen() {
       setScreenState("MONITORING_PIKET");
@@ -2449,7 +2481,7 @@
         const dUid = optSmart(d, "ID_User", "id_user");
         const dNama = optSmart(d, "Nama", "nama");
         const isMine = dUid.toLowerCase() === currentUserId.toLowerCase() || dNama.toLowerCase() === currentUserName.toLowerCase();
-        const isAdminOrBendahara = ["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim"].includes(currentUserRole);
+        const isAdminOrBendahara = isAccountingAccessRole();
         if (isMine || isAdminOrBendahara) {
           count++;
           const idDenda = optSmart(d, "ID_Denda", "id_denda");
@@ -2487,7 +2519,7 @@
     }
 
     // =========================================================================
-    // 8. MODUL USER SETTING (TAMBAH USER BARU + EDIT ROLE & PASSWORD)
+    // 8. MODUL USER SETTING (KHUSUS SUPER ADMIN, KETUA ORGANISASI, WAKAHIM)
     // =========================================================================
     function showUserSettingScreen() {
       setScreenState("USER_SETTING");
@@ -2496,7 +2528,7 @@
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
       rootContainer.appendChild(createLabel("MANAJEMEN USER SETTING", 22, COLOR_YELLOW, true));
 
-      const roles = ["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim", "User Biasa"];
+      const roles = ["Super Admin", "Ketua Organisasi", "Wakahim", "Bendahara", "User Biasa"];
 
       const addUserCard = createCardLayout();
       addUserCard.appendChild(createLabel("➕ Buat Akun User Baru HMSI", 18, COLOR_YELLOW, true));
@@ -2577,7 +2609,8 @@
         uCard.appendChild(createLabel(`Password Sebelumnya: ${uOldPass} | Password Aktif: ${uActivePass}`, 13, COLOR_GREEN, true));
 
         const spRole = createSpinner(roles);
-        const currentRoleIdx = roles.findIndex((r) => r.toLowerCase() === uRole.toLowerCase());
+        const normalizedRole = uRole.toLowerCase() === "user basa" ? "User Biasa" : uRole;
+        const currentRoleIdx = roles.findIndex((r) => r.toLowerCase() === normalizedRole.toLowerCase());
         if (currentRoleIdx >= 0) spRole.selectedIndex = currentRoleIdx;
 
         const etNewPass = createInput("Masukkan Password Baru (kosongkan jika tetap)");
