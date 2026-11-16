@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Aplikasi HMSI</title>
+  <style>
+    :root {
+      --color-bg: #0F172A;
+      --color-card: #1E293B;
+      --color-red: #DC2626;
+      --color-yellow: #EAB308;
+      --color-text: #F8FAFC;
+      --color-muted: #94A3B8;
+      --color-green: #16A34A;
+      --color-secondary-btn: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Container ukuran layar mobile agar 100% sama seperti di Android */
+    #rootContainer {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background-color: var(--color-bg);
+      padding: 24px 18px 40px 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-wrapper {
+      padding: 56px 10px 24px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card.red-card {
+      background-color: var(--color-red);
+    }
+
+    .item-box {
+      background-color: var(--color-bg);
+      padding: 12px;
+      margin: 5px 0;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      padding: 3px 0;
+      line-height: 1.4;
+      white-space: pre-line;
+      word-break: break-word;
+    }
+
+    .input-field {
+      width: 100%;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 14px;
+      margin: 5px 0;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-field::placeholder {
+      color: var(--color-muted);
+    }
+
+    .input-field:focus {
+      border-color: var(--color-yellow);
+    }
+
+    .spinner-field {
+      width: 100%;
+      background-color: var(--color-secondary-btn);
+      color: var(--color-text);
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 13px 12px;
+      margin: 5px 0;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background-color: var(--color-red);
+      color: var(--color-yellow);
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      padding: 13px 14px;
+      margin: 6px 0;
+      font-size: 13.5px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      text-align: center;
+    }
+
+    .btn-primary:active {
+      opacity: 0.85;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background-color: var(--color-secondary-btn);
+      color: var(--color-text);
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 4px 0;
+      font-size: 13.5px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-secondary:active {
+      opacity: 0.85;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin: 4px 0;
+    }
+
+    .btn-row > button {
+      flex: 1;
+    }
+
+    /* Grid Menu 1:1 identik dengan createSquareGridMenu di Android */
+    .square-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+      width: 100%;
+    }
+
+    .square-tile {
+      aspect-ratio: 1 / 1;
+      background-color: var(--color-card);
+      border: 2px solid var(--color-yellow);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      transition: transform 0.1s ease;
+    }
+
+    .square-tile:active {
+      transform: scale(0.97);
+    }
+
+    .square-tile .tile-icon {
+      font-size: 36px;
+      line-height: 1.1;
+    }
+
+    .square-tile .tile-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-top: 12px;
+      white-space: pre-line;
+      line-height: 1.3;
+    }
+
+    /* Preview Foto Live Camera */
+    .img-preview {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid var(--color-yellow);
+      display: none;
+    }
+
+    /* Toast Android Style */
+    #toastBox {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(30, 41, 59, 0.96);
+      color: var(--color-text);
+      border: 1px solid var(--color-yellow);
+      padding: 12px 22px;
+      border-radius: 28px;
+      font-size: 13.5px;
+      z-index: 9999;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    #toastBox.show {
+      opacity: 1;
+    }
+
+    /* Modal Dialog Android AlertDialog + Live Camera Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 8888;
+      padding: 18px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .dialog-box {
+      background-color: var(--color-card);
+      border: 1px solid var(--color-yellow);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dialog-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-yellow);
+      margin-bottom: 6px;
+    }
+
+    .dialog-item {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      padding: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      border: 1px solid #334155;
+      text-align: left;
+    }
+
+    .dialog-item:hover {
+      border-color: var(--color-yellow);
+    }
+
+    #cameraVideo {
+      width: 100%;
+      max-height: 55vh;
+      background: #000;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="rootContainer"></div>
+  <div id="toastBox"></div>
+
+  <!-- AlertDialog Pemilih Bukti Bayar / Nota (Persis showPhotoOrDocumentChooser di Android) -->
+  <div id="chooserModal" class="modal-overlay">
+    <div class="dialog-box">
+      <div class="dialog-title">Pilih Sumber Bukti Bayar / Nota</div>
+      <button class="dialog-item" id="optLiveCam">📸 Ambil Foto Langsung (Kamera)</button>
+      <button class="dialog-item" id="optGallery">🖼️ Pilih Foto dari Galeri</button>
+      <button class="dialog-item" id="optDocument">📄 Pilih File Dokumen (PDF / Gambar)</button>
+      <button class="btn-secondary" id="optCancelChooser">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal Kamera Langsung WebRTC + Fallback Native Camera -->
+  <div id="liveCamModal" class="modal-overlay">
+    <div class="dialog-box">
+      <div class="dialog-title" id="liveCamTitle">📸 Kamera Langsung HMSI</div>
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <div class="btn-row">
+        <button class="btn-primary" id="btnSnapPhoto">📸 AMBIL FOTO</button>
+        <button class="btn-secondary" id="btnSwitchCam">🔄 Putar Kamera</button>
+      </div>
+      <button class="btn-secondary" id="btnCloseCam">Batal</button>
+    </div>
+  </div>
+
+  <!-- Hidden File Inputs untuk Galeri, Kamera Native HP, & Dokumen PDF -->
+  <input type="file" id="inputGallery" accept="image/*" style="display:none" />
+  <input type="file" id="inputNativeCamera" accept="image/*" capture="environment" style="display:none" />
+  <input type="file" id="inputDocument" accept="application/pdf,image/*" style="display:none" />
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI API SERVICE (100% SAMA DENGAN ApiService.kt)
+    // =========================================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_-KyiVUQZRafseAPewLd4dwY08EJHl2aCC2l-oECBtd0UWZPYsLnZSm0x1IZRZD77/exec";
+
+    const ApiService = {
+      post: async function(payload, callback) {
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload),
+            redirect: "follow"
+          });
+          const text = await response.text();
+          const jsonRes = JSON.parse(text);
+          callback(jsonRes);
+        } catch (err) {
+          callback({
+            status: "error",
+            message: "Koneksi gagal: " + (err.message || "Periksa jaringan internet")
+          });
+        }
+      }
+    };
+
+    // =========================================================================
+    // STATE PENGGUNA & DATA LIVE GOOGLE SHEETS (100% SAMA DENGAN MainActivity.kt)
+    // =========================================================================
+    const COLOR_BG = "#0F172A";
+    const COLOR_CARD = "#1E293B";
+    const COLOR_RED = "#DC2626";
+    const COLOR_YELLOW = "#EAB308";
+    const COLOR_TEXT = "#F8FAFC";
+    const COLOR_MUTED = "#94A3B8";
+    const COLOR_GREEN = "#16A34A";
+
+    let currentScreenState = "LOGIN";
+
+    let currentUserId = "";
+    let currentUserName = "";
+    let currentUserUsername = "";
+    let currentUserRole = "";
+    let currentUserDivisi = "";
+
+    let startingBalance = 0;
+    let startingBalanceHistoryList = [];
+    let endingBalance = 0;
+    let qrisUrl = "";
+    let bankAccountsList = [];
+
+    let transactionsList = [];
+    let uangKasList = [];
+    let jadwalPiketList = [];
+    let absenPiketList = [];
+    let dendaList = [];
+    let usersList = [];
+
+    let currentGpsCoordinates = "-6.22970, 106.92420 (Sekretariat HMSI)";
+
+    const monthsList = [
+      "Oktober", "November", "Desember", "Januari", "Februari", "Maret",
+      "April", "Mei", "Juni", "Juli", "Agustus", "September"
+    ];
+
+    const rootContainer = document.getElementById("rootContainer");
+
+    // Inisialisasi GPS Lokasi & Navigasi Back
+    window.addEventListener("DOMContentLoaded", () => {
+      requestNecessaryPermissions();
+      setupBackNavigationHandler();
+      showLoginScreen();
+    });
+
+    function requestNecessaryPermissions() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude.toFixed(5);
+            const lng = pos.coords.longitude.toFixed(5);
+            currentGpsCoordinates = `${lat}, ${lng} (Sekretariat HMSI)`;
+          },
+          () => {
+            currentGpsCoordinates = "-6.22970, 106.92420 (Sekretariat HMSI)";
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+    }
+
+    function setupBackNavigationHandler() {
+      window.history.replaceState({ screen: "LOGIN" }, "");
+      window.addEventListener("popstate", () => {
+        if (currentScreenState.startsWith("ACC_SUB_")) {
+          showAccountingHubScreen(false);
+        } else if (["ACCOUNTING_HUB", "UANG_KAS", "JADWAL_PIKET", "ABSEN_PIKET", "DENDA", "USER_SETTING"].includes(currentScreenState)) {
+          showDashboardScreen(false);
+        } else if (currentScreenState === "DASHBOARD") {
+          toast("Tekan tombol Keluar (Logout) jika ingin berganti akun, atau tutup aplikasi.");
+          window.history.pushState({ screen: "DASHBOARD" }, "");
+        }
+      });
+    }
+
+    function setScreenState(newState, pushHistory = true) {
+      currentScreenState = newState;
+      if (pushHistory) {
+        window.history.pushState({ screen: newState }, "");
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // =========================================================================
+    // 1. LAYAR LOGIN
+    // =========================================================================
+    function showLoginScreen() {
+      setScreenState("LOGIN", false);
+      rootContainer.innerHTML = "";
+
+      const container = document.createElement("div");
+      container.className = "login-wrapper";
+
+      const logoTitle = document.createElement("div");
+      logoTitle.style.fontSize = "30px";
+      logoTitle.style.fontWeight = "bold";
+      logoTitle.style.color = COLOR_YELLOW;
+      logoTitle.style.textAlign = "center";
+      logoTitle.style.whiteSpace = "pre-line";
+      logoTitle.textContent = "🏛️\nHMSI APP";
+
+      const subTitle = document.createElement("div");
+      subTitle.style.fontSize = "14px";
+      subTitle.style.color = COLOR_MUTED;
+      subTitle.style.textAlign = "center";
+      subTitle.style.padding = "12px 0 36px 0";
+      subTitle.style.whiteSpace = "pre-line";
+      subTitle.textContent = "Sistem Informasi Manajemen & Keuangan\nHimpunan Mahasiswa Sistem Informasi";
+
+      const card = createCardLayout();
+      const etUser = createInput("Masukkan Username");
+      const etPass = createInput("Masukkan Password", true, false);
+
+      const btnLogin = createPrimaryButton("MASUK KE SISTEM", () => {
+        const u = etUser.value.trim();
+        const p = etPass.value.trim();
+        if (!u || !p) {
+          toast("Isi Username dan Password terlebih dahulu!");
+          return;
+        }
+        toast("Menghubungkan ke Google Sheets HMSI...");
+        const req = {
+          action: "login",
+          username: u,
+          password: p
+        };
+        ApiService.post(req, (res) => {
+          if (res.status === "success" && res.user) {
+            const userObj = res.user;
+            currentUserId = optSmart(userObj, "id", "id_user");
+            currentUserName = optSmart(userObj, "nama", "name");
+            const uname = optSmart(userObj, "username", "user");
+            currentUserUsername = uname ? uname : u;
+            currentUserRole = optSmart(userObj, "role", "status");
+            currentUserDivisi = optSmart(userObj, "divisi", "divisi_jabatan");
+            refreshAllDataAndShow(() => showDashboardScreen());
+          } else {
+            toast(res.message || "Gagal Login");
+          }
+        });
+      });
+
+      card.appendChild(etUser);
+      card.appendChild(etPass);
+      card.appendChild(btnLogin);
+
+      container.appendChild(logoTitle);
+      container.appendChild(subTitle);
+      container.appendChild(card);
+      rootContainer.appendChild(container);
+    }
+
+    function refreshAllDataAndShow(onDone) {
+      ApiService.post({ action: "getDashboardData" }, (res) => {
+        if (res.status === "success") {
+          startingBalance = Number(res.startingBalance || 0);
+          startingBalanceHistoryList = Array.isArray(res.startingBalanceHistory) ? res.startingBalanceHistory : [];
+          endingBalance = Number(res.endingBalance || 0);
+          qrisUrl = res.qrisUrl || "";
+          bankAccountsList = Array.isArray(res.bankAccounts) ? res.bankAccounts : [];
+          transactionsList = Array.isArray(res.transactions) ? res.transactions : [];
+          uangKasList = Array.isArray(res.uangKas) ? res.uangKas : [];
+          jadwalPiketList = Array.isArray(res.jadwalPiket) ? res.jadwalPiket : [];
+          absenPiketList = Array.isArray(res.absenPiket) ? res.absenPiket : [];
+          dendaList = Array.isArray(res.denda) ? res.denda : [];
+          usersList = Array.isArray(res.users) ? res.users : [];
+        } else {
+          toast("Gagal memuat data terbaru: " + (res.message || ""));
+        }
+        if (onDone) onDone();
+      });
+    }
+
+    // =========================================================================
+    // 2. LAYAR DASHBOARD UTAMA (KOTAK GRID 1:1 DENGAN LOGO & NAMA MENU)
+    // =========================================================================
+    function showDashboardScreen(pushHistory = true) {
+      setScreenState("DASHBOARD", pushHistory);
+      rootContainer.innerHTML = "";
+
+      const headerCard = createCardLayout();
+      headerCard.appendChild(createLabel(`Halo, ${currentUserName} (@${currentUserUsername}) 👋`, 19, COLOR_YELLOW, true));
+      headerCard.appendChild(createLabel(`${currentUserRole} • ${currentUserDivisi}`, 13, COLOR_MUTED, false));
+      rootContainer.appendChild(headerCard);
+
+      const balanceCard = createCardLayout(COLOR_RED);
+      balanceCard.appendChild(createLabel("SALDO KAS ORGANISASI HMSI (LIVE)", 12, COLOR_YELLOW, true));
+      balanceCard.appendChild(createLabel(`Starting Balance: ${formatRupiah(startingBalance)}`, 14, COLOR_TEXT, false));
+      balanceCard.appendChild(createLabel(`Ending Balance: ${formatRupiah(endingBalance)}`, 24, COLOR_YELLOW, true));
+      rootContainer.appendChild(balanceCard);
+
+      const lblPilih = createLabel("PILIH MENU UTAMA", 15, COLOR_YELLOW, true);
+      lblPilih.style.padding = "6px 2px 10px 2px";
+      rootContainer.appendChild(lblPilih);
+
+      const menuItems = [];
+      if (["Bendahara", "Ketua Organisasi", "Wakahim", "Super Admin"].includes(currentUserRole)) {
+        menuItems.push(["📊", "Accounting", () => showAccountingHubScreen()]);
+      }
+      menuItems.push(["💵", "Uang Kas", () => showUangKasScreen()]);
+
+      if (["Super Admin", "Ketua Organisasi", "Wakahim"].includes(currentUserRole)) {
+        menuItems.push(["📅", "Kelola Jadwal\nPiket", () => showKelolaJadwalPiketScreen()]);
+      }
+      menuItems.push(["📸", "Absen Piket\n(Live Cam)", () => showAbsenPiketScreen()]);
+      menuItems.push(["⚠️", "Menu Denda\n(Rp 20.000)", () => showDendaScreen()]);
+
+      if (["Super Admin", "Bendahara"].includes(currentUserRole)) {
+        menuItems.push(["⚙️", "User Setting\n& Password", () => showUserSettingScreen()]);
+      }
+
+      rootContainer.appendChild(createSquareGridMenu(menuItems));
+
+      rootContainer.appendChild(createSecondaryButton("🔄 Sinkronisasi Data Google Sheets", () => {
+        toast("Menyinkronkan data...");
+        refreshAllDataAndShow(() => showDashboardScreen(false));
+      }));
+      rootContainer.appendChild(createSecondaryButton("🚪 Keluar Akun (Logout)", () => showLoginScreen()));
+    }
+
+    // =========================================================================
+    // 3. HUB MODUL ACCOUNTING (DIBAGI MENJADI 6 ANAK MENU KOTAK 1:1)
+    // =========================================================================
+    function showAccountingHubScreen(pushHistory = true) {
+      setScreenState("ACCOUNTING_HUB", pushHistory);
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("MODUL ACCOUNTING HMSI", 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(createLabel("Pilih sub-menu di bawah agar tampilan fokus satu per satu:", 13, COLOR_MUTED, false));
+
+      const summaryCard = createCardLayout(COLOR_RED);
+      summaryCard.appendChild(createLabel(`Starting Balance: ${formatRupiah(startingBalance)}`, 14, COLOR_TEXT, false));
+      summaryCard.appendChild(createLabel(`Ending Balance: ${formatRupiah(endingBalance)}`, 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(summaryCard);
+
+      const subMenus = [
+        ["💰", "Kelola Saldo\nAwal & Riwayat", () => showAccSubStartingBalance()],
+        ["🧾", "Buat Invoice /\nPengeluaran", () => showAccSubInputExpense()],
+        ["✅", "Verifikasi Kas\n& Denda", () => showAccSubVerification()],
+        ["📋", "Cek Status Kas\nAnggota", () => showAccSubMemberKasStatus()],
+        ["🏦", "Atur QRIS &\nRekening Bank", () => showAccSubPaymentSettings()],
+        ["📄", "Buku Kas &\nExport PDF", () => showAccSubLedgerAndPdf()]
+      ];
+
+      rootContainer.appendChild(createSquareGridMenu(subMenus));
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3A: KELOLA STARTING BALANCE + RIWAYAT & TANGGALNYA
+    // -------------------------------------------------------------------------
+    function showAccSubStartingBalance() {
+      setScreenState("ACC_SUB_STARTING");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("KELOLA STARTING BALANCE", 20, COLOR_YELLOW, true));
+
+      const infoCard = createCardLayout(COLOR_RED);
+      infoCard.appendChild(createLabel("Starting Balance Saat Ini (Live GSheet):", 13, COLOR_TEXT, false));
+      infoCard.appendChild(createLabel(formatRupiah(startingBalance), 24, COLOR_YELLOW, true));
+      infoCard.appendChild(createLabel(`Ending Balance Berjalan: ${formatRupiah(endingBalance)}`, 14, COLOR_TEXT, false));
+      rootContainer.appendChild(infoCard);
+
+      const isEditor = ["Bendahara", "Super Admin"].includes(currentUserRole);
+      if (!isEditor) {
+        rootContainer.appendChild(createLabel("Hanya Bendahara / Super Admin yang dapat mengubah Starting Balance.", 14, COLOR_MUTED, false));
+      } else {
+        const setCard = createCardLayout();
+        setCard.appendChild(createLabel("1. Tetapkan Nilai Starting Balance Baru", 16, COLOR_YELLOW, true));
+        const etSet = createInput("Masukkan nominal Starting Balance (Rp)", false, true);
+        etSet.value = String(startingBalance);
+        const btnSet = createPrimaryButton("SIMPAN STARTING BALANCE UTAMA", () => {
+          const v = etSet.value.trim();
+          if (!v) {
+            toast("Nominal tidak boleh kosong!");
+            return;
+          }
+          ApiService.post({
+            action: "manageStartingBalance",
+            mode: "SET",
+            amount: v,
+            updatedBy: currentUserName
+          }, (res) => {
+            toast(res.message || "Berhasil disimpan");
+            refreshAllDataAndShow(() => showAccSubStartingBalance());
+          });
+        });
+        setCard.appendChild(etSet);
+        setCard.appendChild(btnSet);
+        rootContainer.appendChild(setCard);
+
+        const addCard = createCardLayout();
+        addCard.appendChild(createLabel("2. Tambah Dana ke Starting Balance (+)", 16, COLOR_YELLOW, true));
+        const etAdd = createInput("Nominal tambahan ke Starting Balance (Rp)", false, true);
+        const btnAdd = createPrimaryButton("+ TAMBAHKAN KE STARTING BALANCE", () => {
+          const v = etAdd.value.trim();
+          if (!v) {
+            toast("Masukkan nominal tambahan terlebih dahulu!");
+            return;
+          }
+          ApiService.post({
+            action: "manageStartingBalance",
+            mode: "ADD",
+            amount: v,
+            updatedBy: currentUserName
+          }, (res) => {
+            toast(res.message || "Berhasil ditambahkan");
+            refreshAllDataAndShow(() => showAccSubStartingBalance());
+          });
+        });
+        addCard.appendChild(etAdd);
+        addCard.appendChild(btnAdd);
+        rootContainer.appendChild(addCard);
+      }
+
+      const historyCard = createCardLayout();
+      historyCard.appendChild(createLabel("📜 Riwayat Perubahan Starting Balance Sebelumnya", 17, COLOR_YELLOW, true));
+      if (startingBalanceHistoryList.length === 0) {
+        historyCard.appendChild(createLabel("Belum ada riwayat perubahan Starting Balance yang tercatat.", 13, COLOR_MUTED, false));
+      } else {
+        startingBalanceHistoryList.forEach((h) => {
+          const tgl = h.tanggal || "-";
+          const mode = h.mode || "Update";
+          const prevBal = Number(h.previousBalance || 0);
+          const inpAmt = Number(h.inputAmount || 0);
+          const newBal = Number(h.newBalance || 0);
+          const by = h.updatedBy || "Bendahara";
+
+          const itemBox = document.createElement("div");
+          itemBox.className = "item-box";
+          itemBox.appendChild(createLabel(`📅 Tanggal: ${tgl} (${by})`, 13, COLOR_YELLOW, true));
+          itemBox.appendChild(createLabel(`Aksi: ${mode} (${formatRupiah(inpAmt)})`, 13, COLOR_TEXT, false));
+          itemBox.appendChild(createLabel(`Saldo Awal Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}`, 13, COLOR_GREEN, true));
+          historyCard.appendChild(itemBox);
+        });
+      }
+      rootContainer.appendChild(historyCard);
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3B: INPUT PENGELUARAN
+    // -------------------------------------------------------------------------
+    function showAccSubInputExpense() {
+      setScreenState("ACC_SUB_EXPENSE");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("INPUT INVOICE PENGELUARAN", 20, COLOR_YELLOW, true));
+      rootContainer.appendChild(createLabel(`Ending Balance Saat Ini: ${formatRupiah(endingBalance)}`, 15, COLOR_TEXT, true));
+
+      const formCard = createCardLayout();
+      formCard.appendChild(createLabel("Pilih Jenis Pengeluaran:", 14, COLOR_YELLOW, true));
+      const spKat = createSpinner(["Pengeluaran Proker", "Pengeluaran Bulanan"]);
+      const etDesk = createInput("Deskripsi Pengeluaran (contoh: Upgrading / Galon)");
+      const etNom = createInput("Nominal Pengeluaran (Rp)", false, true);
+
+      let notaB64 = "";
+      let notaMime = "image/jpeg";
+      let notaExt = "jpg";
+      const tvStatus = createLabel("Belum ada foto/dokumen nota dipilih", 12, COLOR_MUTED, false);
+
+      const btnNota = createSecondaryButton("📎 AMBIL FOTO LANGSUNG / PILIH DOKUMEN NOTA (WAJIB)", () => {
+        showPhotoOrDocumentChooser((b64, mime, ext, labelName) => {
+          notaB64 = b64;
+          notaMime = mime;
+          notaExt = ext;
+          tvStatus.textContent = `✔ Bukti Terpilih: ${labelName} (.${ext})`;
+          tvStatus.style.color = COLOR_GREEN;
+        });
+      });
+
+      const btnSimpan = createPrimaryButton("SIMPAN PENGELUARAN", () => {
+        const d = etDesk.value.trim();
+        const n = etNom.value.trim();
+        if (!d || !n || !notaB64) {
+          toast("Wajib mengisi deskripsi, nominal, dan melampirkan foto/dokumen nota!");
+          return;
+        }
+        toast("Mengunggah bukti nota & menyimpan pengeluaran...");
+        ApiService.post({
+          action: "addExpense",
+          kategori: spKat.value,
+          deskripsi: d,
+          nominal: n,
+          base64Image: notaB64,
+          mimeType: notaMime,
+          fileExtension: notaExt,
+          inputBy: currentUserName
+        }, (res) => {
+          toast(res.message || "Pengeluaran tersimpan");
+          refreshAllDataAndShow(() => showAccSubInputExpense());
+        });
+      });
+
+      formCard.appendChild(spKat);
+      formCard.appendChild(etDesk);
+      formCard.appendChild(etNom);
+      formCard.appendChild(btnNota);
+      formCard.appendChild(tvStatus);
+      formCard.appendChild(btnSimpan);
+      rootContainer.appendChild(formCard);
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3C: VERIFIKASI UANG KAS & DENDA
+    // -------------------------------------------------------------------------
+    function showAccSubVerification() {
+      setScreenState("ACC_SUB_VERIF");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("VERIFIKASI UANG KAS & DENDA", 20, COLOR_YELLOW, true));
+
+      let pendingCount = 0;
+      uangKasList.forEach((item) => {
+        const st = optSmart(item, "Status", "status");
+        if (st.toLowerCase() === "pending") {
+          pendingCount++;
+          const idKas = optSmart(item, "ID_Kas", "id_kas");
+          const nama = optSmart(item, "Nama", "nama");
+          const bulan = optSmart(item, "Bulan", "bulan");
+          const nom = Number(optSmart(item, "Nominal", "nominal")) || 10000;
+          const bukti = optSmart(item, "URL_Bukti_Drive", "url_bukti_drive");
+          const card = createCardLayout();
+          card.appendChild(createVerificationRow("KAS", idKas, `UANG KAS: ${nama}\nBulan: ${bulan} • ${formatRupiah(nom)}`, bukti));
+          rootContainer.appendChild(card);
+        }
+      });
+
+      dendaList.forEach((item) => {
+        const st = optSmart(item, "Status", "status");
+        if (st.toLowerCase() === "pending") {
+          pendingCount++;
+          const idDenda = optSmart(item, "ID_Denda", "id_denda");
+          const nama = optSmart(item, "Nama", "nama");
+          const alasan = optSmart(item, "Alasan_Denda", "alasan_denda");
+          const nom = Number(optSmart(item, "Nominal", "nominal")) || 20000;
+          const bukti = optSmart(item, "URL_Bukti_Drive", "url_bukti_drive");
+          const card = createCardLayout();
+          card.appendChild(createVerificationRow("DENDA", idDenda, `DENDA PIKET: ${nama}\n${alasan} • ${formatRupiah(nom)}`, bukti));
+          rootContainer.appendChild(card);
+        }
+      });
+
+      if (pendingCount === 0) {
+        const emptyCard = createCardLayout();
+        emptyCard.appendChild(createLabel("🎉 Tidak ada antrean bukti bayar Uang Kas atau Denda yang berstatus Pending.", 14, COLOR_GREEN, true));
+        rootContainer.appendChild(emptyCard);
+      }
+    }
+
+    function createVerificationRow(targetType, targetId, title, buktiUrl) {
+      const box = document.createElement("div");
+      box.appendChild(createLabel(title, 15, COLOR_TEXT, true));
+      if (buktiUrl && buktiUrl.startsWith("http")) {
+        box.appendChild(createSecondaryButton("🔍 Lihat Bukti Transfer", () => {
+          window.open(buktiUrl, "_blank");
+        }));
+      }
+      const btnRow = document.createElement("div");
+      btnRow.className = "btn-row";
+      const btnApprove = createPrimaryButton("✔ SETUJUI", () => submitVerification(targetType, targetId, "APPROVE"));
+      const btnDecline = createSecondaryButton("✖ TOLAK", () => submitVerification(targetType, targetId, "DECLINE"));
+      btnRow.appendChild(btnApprove);
+      btnRow.appendChild(btnDecline);
+      box.appendChild(btnRow);
+      return box;
+    }
+
+    function submitVerification(targetType, targetId, decision) {
+      ApiService.post({
+        action: "verifyPayment",
+        targetType: targetType,
+        targetId: targetId,
+        decision: decision,
+        verifiedBy: currentUserName
+      }, (res) => {
+        toast(res.message || "Verifikasi berhasil");
+        refreshAllDataAndShow(() => showAccSubVerification());
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3D: CEK SIAPA YANG SUDAH & BELUM BAYAR UANG KAS
+    // -------------------------------------------------------------------------
+    function showAccSubMemberKasStatus() {
+      setScreenState("ACC_SUB_MEMBER_KAS");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("CEK STATUS KAS ANGGOTA", 20, COLOR_YELLOW, true));
+      rootContainer.appendChild(createLabel("Membandingkan daftar seluruh anggota di tab Users dengan pembayaran kas per bulan:", 13, COLOR_MUTED, false));
+
+      const filterCard = createCardLayout();
+      filterCard.appendChild(createLabel("Pilih Bulan Pemeriksaan:", 14, COLOR_YELLOW, true));
+      const spMonth = createSpinner(monthsList);
+      const resultBox = document.createElement("div");
+
+      function renderChecklist(month) {
+        resultBox.innerHTML = "";
+        const paidList = [];
+        const pendingList = [];
+        const unpaidList = [];
+
+        usersList.forEach((u) => {
+          const uid = getUserIdSmart(u);
+          const uname = getUserNameSmart(u);
+          const udiv = getUserDivisiSmart(u);
+
+          let foundStatus = "BELUM BAYAR";
+          for (let kIdx = 0; kIdx < uangKasList.length; kIdx++) {
+            const k = uangKasList[kIdx];
+            const kUid = optSmart(k, "ID_User", "id_user");
+            const kName = optSmart(k, "Nama", "nama");
+            const kMonth = optSmart(k, "Bulan", "bulan");
+            if ((kUid.toLowerCase() === uid.toLowerCase() || kName.toLowerCase() === uname.toLowerCase()) && kMonth.toLowerCase() === month.toLowerCase()) {
+              foundStatus = optSmart(k, "Status", "status") || "Pending";
+              break;
+            }
+          }
+
+          if (foundStatus.toLowerCase().includes("approved")) {
+            paidList.push(`✔ ${uname} (${udiv}) — LUNAS`);
+          } else if (foundStatus.toLowerCase().includes("pending")) {
+            pendingList.push(`⏳ ${uname} (${udiv}) — PENDING VERIFIKASI`);
+          } else if (foundStatus.toLowerCase().includes("declined")) {
+            unpaidList.push(`❌ ${uname} (${udiv}) — DITOLAK (Wajib Upload Ulang)`);
+          } else {
+            unpaidList.push(`❗ ${uname} (${udiv}) — BELUM BAYAR`);
+          }
+        });
+
+        const hPaid = createLabel(`SUDAH BAYAR / LUNAS (${paidList.length} Orang)`, 15, COLOR_GREEN, true);
+        hPaid.style.paddingTop = "12px";
+        resultBox.appendChild(hPaid);
+        if (paidList.length === 0) resultBox.appendChild(createLabel(`- Belum ada yang lunas di bulan ${month}`, 13, COLOR_MUTED, false));
+        paidList.forEach((t) => resultBox.appendChild(createLabel(t, 13, COLOR_TEXT, false)));
+
+        const hPend = createLabel(`MENUNGGU VERIFIKASI (${pendingList.length} Orang)`, 15, COLOR_YELLOW, true);
+        hPend.style.paddingTop = "14px";
+        resultBox.appendChild(hPend);
+        if (pendingList.length === 0) resultBox.appendChild(createLabel("- Tidak ada antrean pending", 13, COLOR_MUTED, false));
+        pendingList.forEach((t) => resultBox.appendChild(createLabel(t, 13, COLOR_YELLOW, false)));
+
+        const hUnpaid = createLabel(`BELUM BAYAR / DITOLAK (${unpaidList.length} Orang)`, 15, COLOR_RED, true);
+        hUnpaid.style.paddingTop = "14px";
+        resultBox.appendChild(hUnpaid);
+        if (unpaidList.length === 0) resultBox.appendChild(createLabel("🎉 Semua anggota sudah bayar!", 13, COLOR_GREEN, false));
+        unpaidList.forEach((t) => resultBox.appendChild(createLabel(t, 13, COLOR_TEXT, false)));
+      }
+
+      spMonth.addEventListener("change", () => renderChecklist(spMonth.value));
+      filterCard.appendChild(spMonth);
+      filterCard.appendChild(resultBox);
+      rootContainer.appendChild(filterCard);
+      renderChecklist(monthsList[0]);
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3E: PENGATURAN QRIS & REKENING BANK TERPISAH
+    // -------------------------------------------------------------------------
+    function showAccSubPaymentSettings() {
+      setScreenState("ACC_SUB_PAYMENT");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("PENGATURAN QRIS & REKENING", 20, COLOR_YELLOW, true));
+
+      const qrisCard = createCardLayout();
+      qrisCard.appendChild(createLabel("1. Pengaturan Kode QRIS HMSI", 17, COLOR_YELLOW, true));
+      const hasQris = qrisUrl && qrisUrl.startsWith("http");
+      qrisCard.appendChild(createLabel(
+        hasQris ? "Status QRIS: ✔ Aktif Tersimpan di Google Drive" : "Status QRIS: ❌ Belum Ada Gambar QRIS",
+        13,
+        hasQris ? COLOR_GREEN : COLOR_MUTED,
+        true
+      ));
+
+      if (hasQris) {
+        qrisCard.appendChild(createSecondaryButton("🔍 Lihat Gambar QRIS Saat Ini", () => {
+          window.open(qrisUrl, "_blank");
+        }));
+      }
+
+      qrisCard.appendChild(createPrimaryButton(hasQris ? "✏️ GANTI / EDIT GAMBAR QRIS" : "📤 UPLOAD GAMBAR QRIS BARU", () => {
+        pickFromGallery((b64) => {
+          toast("Mengunggah QRIS ke Google Drive...");
+          ApiService.post({
+            action: "manageQris",
+            subAction: "UPLOAD",
+            base64Qris: b64
+          }, (res) => {
+            toast(res.message || "QRIS diperbarui");
+            refreshAllDataAndShow(() => showAccSubPaymentSettings());
+          });
+        });
+      }));
+
+      if (hasQris) {
+        qrisCard.appendChild(createSecondaryButton("🗑️ HAPUS GAMBAR QRIS", () => {
+          ApiService.post({
+            action: "manageQris",
+            subAction: "DELETE"
+          }, (res) => {
+            toast(res.message || "QRIS dihapus");
+            refreshAllDataAndShow(() => showAccSubPaymentSettings());
+          });
+        }));
+      }
+      rootContainer.appendChild(qrisCard);
+
+      const bankCard = createCardLayout();
+      bankCard.appendChild(createLabel("2. Daftar Rekening Bank / E-Wallet", 17, COLOR_YELLOW, true));
+
+      if (bankAccountsList.length === 0) {
+        bankCard.appendChild(createLabel("Belum ada nomor rekening yang disimpan.", 13, COLOR_MUTED, false));
+      } else {
+        bankAccountsList.forEach((b, i) => {
+          const bid = b.id || "";
+          const bName = b.bankName || "";
+          const bNum = b.accountNumber || "";
+          const bHolder = b.accountHolder || "";
+
+          const itemBox = document.createElement("div");
+          itemBox.className = "item-box";
+
+          const etEditBank = createInput("Nama Bank / E-Wallet");
+          etEditBank.value = bName;
+          const etEditNo = createInput("Nomor Rekening");
+          etEditNo.value = bNum;
+          const etEditHolder = createInput("Atas Nama (a.n.)");
+          etEditHolder.value = bHolder;
+
+          const actionRow = document.createElement("div");
+          actionRow.className = "btn-row";
+
+          const btnEdit = createPrimaryButton("💾 SIMPAN EDIT", () => {
+            ApiService.post({
+              action: "manageBankAccount",
+              subAction: "EDIT",
+              bankId: bid,
+              bankName: etEditBank.value.trim(),
+              accountNumber: etEditNo.value.trim(),
+              accountHolder: etEditHolder.value.trim()
+            }, (res) => {
+              toast(res.message || "Rekening diperbarui");
+              refreshAllDataAndShow(() => showAccSubPaymentSettings());
+            });
+          });
+
+          const btnDel = createSecondaryButton("🗑️ HAPUS", () => {
+            ApiService.post({
+              action: "manageBankAccount",
+              subAction: "DELETE",
+              bankId: bid
+            }, (res) => {
+              toast(res.message || "Rekening dihapus");
+              refreshAllDataAndShow(() => showAccSubPaymentSettings());
+            });
+          });
+
+          actionRow.appendChild(btnEdit);
+          actionRow.appendChild(btnDel);
+
+          itemBox.appendChild(createLabel(`Rekening #${i + 1}`, 13, COLOR_YELLOW, true));
+          itemBox.appendChild(etEditBank);
+          itemBox.appendChild(etEditNo);
+          itemBox.appendChild(etEditHolder);
+          itemBox.appendChild(actionRow);
+          bankCard.appendChild(itemBox);
+        });
+      }
+
+      const lblAdd = createLabel("+ Tambah Nomor Rekening / E-Wallet Baru", 15, COLOR_YELLOW, true);
+      lblAdd.style.paddingTop = "16px";
+      bankCard.appendChild(lblAdd);
+
+      const etNewBank = createInput("Nama Bank / E-Wallet (contoh: Bank Mandiri / Dana)");
+      const etNewNo = createInput("Nomor Rekening");
+      const etNewHolder = createInput("Atas Nama (contoh: a.n. Bendahara HMSI)");
+      const btnAddBank = createPrimaryButton("+ TAMBAH REKENING BARU", () => {
+        if (!etNewBank.value.trim() || !etNewNo.value.trim()) {
+          toast("Isi nama bank dan nomor rekening!");
+          return;
+        }
+        ApiService.post({
+          action: "manageBankAccount",
+          subAction: "ADD",
+          bankName: etNewBank.value.trim(),
+          accountNumber: etNewNo.value.trim(),
+          accountHolder: etNewHolder.value.trim()
+        }, (res) => {
+          toast(res.message || "Rekening ditambahkan");
+          refreshAllDataAndShow(() => showAccSubPaymentSettings());
+        });
+      });
+
+      bankCard.appendChild(etNewBank);
+      bankCard.appendChild(etNewNo);
+      bankCard.appendChild(etNewHolder);
+      bankCard.appendChild(btnAddBank);
+      rootContainer.appendChild(bankCard);
+    }
+
+    // -------------------------------------------------------------------------
+    // ANAK MENU ACCOUNTING 3F: BUKU KAS TERPADU & EXPORT PDF
+    // -------------------------------------------------------------------------
+    function showAccSubLedgerAndPdf() {
+      setScreenState("ACC_SUB_LEDGER");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
+      rootContainer.appendChild(createLabel("BUKU KAS & LAPORAN PDF", 20, COLOR_YELLOW, true));
+
+      rootContainer.appendChild(createPrimaryButton("📄 CETAK / DOWNLOAD LAPORAN PDF", () => {
+        toast("Men-generate PDF Laporan Keuangan di Google Drive...");
+        ApiService.post({ action: "exportAccountingPdf" }, (res) => {
+          toast(res.message || "PDF siap");
+          if (res.pdfUrl) {
+            window.open(res.pdfUrl, "_blank");
+          }
+        });
+      }));
+
+      const trxCard = createCardLayout();
+      trxCard.appendChild(createLabel(`Starting Balance: ${formatRupiah(startingBalance)}`, 14, COLOR_TEXT, false));
+      trxCard.appendChild(createLabel(`Ending Balance Saat Ini: ${formatRupiah(endingBalance)}`, 16, COLOR_YELLOW, true));
+
+      let count = 0;
+      for (let i = transactionsList.length - 1; i >= 0; i--) {
+        const t = transactionsList[i];
+        const idTrx = optSmart(t, "ID_Transaksi", "id_transaksi");
+        if (idTrx === "TRX-INIT") continue;
+        count++;
+        const tipe = optSmart(t, "Tipe", "tipe");
+        const kategori = optSmart(t, "Kategori", "kategori");
+        const deskripsi = optSmart(t, "Deskripsi", "deskripsi");
+        const nominal = Number(optSmart(t, "Nominal", "nominal")) || 0;
+        const runBal = Number(optSmart(t, "Running_Balance", "running_balance")) || 0;
+        const bukti = optSmart(t, "URL_Bukti_Drive", "url_bukti_drive");
+        const isIncome = tipe.toLowerCase() === "income";
+        const color = isIncome ? COLOR_GREEN : COLOR_RED;
+        const rowText = `• [${kategori}] ${deskripsi}\n   ${isIncome ? "+" : "-"}${formatRupiah(nominal)} | Saldo: ${formatRupiah(runBal)}`;
+
+        const lbl = createLabel(rowText, 13, color, false);
+        lbl.style.paddingTop = "8px";
+        trxCard.appendChild(lbl);
+
+        if (bukti && bukti.startsWith("http")) {
+          trxCard.appendChild(createSecondaryButton("📎 Lihat Bukti Nota / Dokumen", () => {
+            window.open(bukti, "_blank");
+          }));
+        }
+      }
+
+      if (count === 0) {
+        trxCard.appendChild(createLabel("Belum ada transaksi tercatat di Google Sheets.", 13, COLOR_MUTED, false));
+      }
+      rootContainer.appendChild(trxCard);
+    }
+
+    // =========================================================================
+    // 4. MODUL UANG KAS (AKSES SEMUA USER)
+    // =========================================================================
+    function showUangKasScreen() {
+      setScreenState("UANG_KAS");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("MENU UANG KAS HMSI", 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(createPaymentInfoDisplayCard());
+
+      const uploadCard = createCardLayout();
+      uploadCard.appendChild(createLabel("Form Upload Bukti Bayar Kas", 16, COLOR_YELLOW, true));
+      const spBulan = createSpinner(monthsList);
+      let buktiKasB64 = "";
+      const tvStatusFoto = createLabel("Wajib upload foto bukti bayar", 12, COLOR_MUTED, false);
+
+      const btnPilihBukti = createSecondaryButton("📷 Pilih Foto Bukti Transfer", () => {
+        pickFromGallery((b64) => {
+          buktiKasB64 = b64;
+          tvStatusFoto.textContent = "✔ Foto Bukti Kas Siap Dikirim";
+          tvStatusFoto.style.color = COLOR_GREEN;
+        });
+      });
+
+      const btnKirimKas = createPrimaryButton("KIRIM BUKTI UANG KAS", () => {
+        if (!buktiKasB64) {
+          toast("Wajib mengunggah foto bukti pembayaran!");
+          return;
+        }
+        ApiService.post({
+          action: "submitUangKas",
+          userId: currentUserId,
+          nama: currentUserName,
+          bulan: spBulan.value,
+          nominal: 10000,
+          base64Image: buktiKasB64
+        }, (res) => {
+          toast(res.message || "Bukti Uang Kas terkirim");
+          refreshAllDataAndShow(() => showUangKasScreen());
+        });
+      });
+
+      uploadCard.appendChild(spBulan);
+      uploadCard.appendChild(btnPilihBukti);
+      uploadCard.appendChild(tvStatusFoto);
+      uploadCard.appendChild(btnKirimKas);
+      rootContainer.appendChild(uploadCard);
+
+      const listCard = createCardLayout();
+      listCard.appendChild(createLabel("Riwayat & Status Uang Kas per Bulan", 16, COLOR_YELLOW, true));
+      const spFilterBulan = createSpinner(monthsList);
+      const resultContainer = document.createElement("div");
+
+      function renderKasByMonth(selectedMonth) {
+        resultContainer.innerHTML = "";
+        let count = 0;
+        uangKasList.forEach((k) => {
+          const kBulan = optSmart(k, "Bulan", "bulan");
+          if (kBulan.toLowerCase() === selectedMonth.toLowerCase()) {
+            count++;
+            const kNama = optSmart(k, "Nama", "nama");
+            const st = optSmart(k, "Status", "status");
+            const badgeColor = st.toLowerCase().includes("approved")
+              ? COLOR_GREEN
+              : st.toLowerCase().includes("declined")
+              ? COLOR_RED
+              : COLOR_YELLOW;
+            resultContainer.appendChild(createLabel(`• ${kNama} — Status: ${st}`, 14, badgeColor, true));
+            const urlBukti = optSmart(k, "URL_Bukti_Drive", "url_bukti_drive");
+            if (urlBukti && urlBukti.startsWith("http")) {
+              resultContainer.appendChild(createSecondaryButton(`Lihat Bukti Bayar (${kNama})`, () => {
+                window.open(urlBukti, "_blank");
+              }));
+            }
+          }
+        });
+        if (count === 0) {
+          resultContainer.appendChild(createLabel(`Belum ada data pembayaran pada bulan ${selectedMonth}.`, 13, COLOR_MUTED, false));
+        }
+      }
+
+      spFilterBulan.addEventListener("change", () => renderKasByMonth(spFilterBulan.value));
+      listCard.appendChild(spFilterBulan);
+      listCard.appendChild(resultContainer);
+      rootContainer.appendChild(listCard);
+      renderKasByMonth(monthsList[0]);
+    }
+
+    function createPaymentInfoDisplayCard() {
+      const card = createCardLayout();
+      card.appendChild(createLabel("Informasi Pembayaran Resmi HMSI", 16, COLOR_YELLOW, true));
+      if (qrisUrl && qrisUrl.startsWith("http")) {
+        card.appendChild(createSecondaryButton("🔍 Buka & Scan Gambar QRIS HMSI", () => {
+          window.open(qrisUrl, "_blank");
+        }));
+      } else {
+        card.appendChild(createLabel("QRIS: Belum diunggah oleh Bendahara", 13, COLOR_MUTED, false));
+      }
+
+      if (bankAccountsList.length === 0) {
+        card.appendChild(createLabel("Rekening: Belum diatur oleh Bendahara di menu Accounting", 13, COLOR_MUTED, false));
+      } else {
+        bankAccountsList.forEach((b) => {
+          card.appendChild(createLabel(`🏦 ${b.bankName || ""}: ${b.accountNumber || ""} (${b.accountHolder || ""})`, 14, COLOR_TEXT, true));
+        });
+      }
+      return card;
+    }
+
+    // =========================================================================
+    // 5. MODUL KELOLA JADWAL PIKET
+    // =========================================================================
+    function showKelolaJadwalPiketScreen() {
+      setScreenState("JADWAL_PIKET");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("KELOLA JADWAL PIKET HMSI", 22, COLOR_YELLOW, true));
+
+      const todayDate = getTodayFormatted();
+      const currentMonthPrefix = todayDate.substring(0, 7);
+      let selectedDateStr = todayDate;
+
+      const formCard = createCardLayout();
+      formCard.appendChild(createLabel("Atur Petugas Piket per Tanggal", 17, COLOR_YELLOW, true));
+      const tvDate = createLabel(`Tanggal Dipilih: ${selectedDateStr}`, 15, COLOR_TEXT, true);
+
+      const dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.className = "input-field";
+      dateInput.value = selectedDateStr;
+      dateInput.addEventListener("change", () => {
+        if (dateInput.value) {
+          selectedDateStr = dateInput.value;
+          tvDate.textContent = `Tanggal Dipilih: ${selectedDateStr}`;
+        }
+      });
+
+      const btnDatePicker = createSecondaryButton("📅 Pilih Tanggal Piket (Date Picker)", () => {
+        if (dateInput.showPicker) {
+          dateInput.showPicker();
+        } else {
+          dateInput.focus();
+        }
+      });
+
+      const userDisplayNames = usersList.map((u) => `${getUserIdSmart(u)} | ${getUserNameSmart(u)} (${getUserDivisiSmart(u)})`);
+      const spUser = createSpinner(userDisplayNames);
+
+      const btnSimpanJadwal = createPrimaryButton("SIMPAN JADWAL PIKET", () => {
+        if (usersList.length === 0) {
+          toast("Data user di Google Sheets masih kosong!");
+          return;
+        }
+        const idx = spUser.selectedIndex >= 0 ? spUser.selectedIndex : 0;
+        const uObj = usersList[idx];
+        ApiService.post({
+          action: "saveJadwalPiket",
+          tanggalPiket: selectedDateStr,
+          userId: getUserIdSmart(uObj),
+          nama: getUserNameSmart(uObj),
+          divisi: getUserDivisiSmart(uObj),
+          createdBy: currentUserName
+        }, (res) => {
+          toast(res.message || "Jadwal piket disimpan");
+          refreshAllDataAndShow(() => showKelolaJadwalPiketScreen());
+        });
+      });
+
+      formCard.appendChild(tvDate);
+      formCard.appendChild(btnDatePicker);
+      formCard.appendChild(dateInput);
+      formCard.appendChild(createLabel("Pilih Anggota Piket (Live dari Tab Users):", 13, COLOR_MUTED, false));
+      formCard.appendChild(spUser);
+      formCard.appendChild(btnSimpanJadwal);
+      rootContainer.appendChild(formCard);
+
+      const historyCard = createCardLayout();
+      historyCard.appendChild(createLabel("Riwayat Jadwal Piket Bulanan", 17, COLOR_YELLOW, true));
+
+      const availablePeriodsSet = new Set([currentMonthPrefix]);
+      jadwalPiketList.forEach((j) => {
+        const tglNorm = normalizeDateString(optSmart(j, "Tanggal_Piket", "tanggal_piket", "Tanggal"));
+        const blnNorm = normalizeMonthString(optSmart(j, "Bulan_Tahun", "bulan_tahun", "Bulan"), tglNorm);
+        if (blnNorm) availablePeriodsSet.add(blnNorm);
+      });
+      const periodList = Array.from(availablePeriodsSet);
+      const spPeriode = createSpinner(periodList);
+      const listContainer = document.createElement("div");
+
+      function renderSchedulePeriod(period) {
+        listContainer.innerHTML = "";
+        let found = 0;
+        jadwalPiketList.forEach((j) => {
+          const rawTgl = optSmart(j, "Tanggal_Piket", "tanggal_piket", "Tanggal");
+          const tglNorm = normalizeDateString(rawTgl);
+          const blnNorm = normalizeMonthString(optSmart(j, "Bulan_Tahun", "bulan_tahun", "Bulan"), tglNorm);
+          const namaPetugas = optSmart(j, "Nama", "nama", "Name");
+          const divisiPetugas = optSmart(j, "Divisi", "divisi", "Divisi_Jabatan", "jabatan");
+
+          if (tglNorm.startsWith(period) || blnNorm === period) {
+            found++;
+            const row = createLabel(`• ${tglNorm || rawTgl} : ${namaPetugas} (${divisiPetugas})`, 14, COLOR_TEXT, true);
+            row.style.padding = "5px 0";
+            listContainer.appendChild(row);
+          }
+        });
+        if (found === 0) {
+          listContainer.appendChild(createLabel(`Belum ada jadwal piket pada periode ${period}.`, 13, COLOR_MUTED, false));
+        }
+      }
+
+      spPeriode.addEventListener("change", () => renderSchedulePeriod(spPeriode.value));
+      historyCard.appendChild(createLabel("Filter Periode Bulan (Default Bulan Berjalan):", 13, COLOR_MUTED, false));
+      historyCard.appendChild(spPeriode);
+      historyCard.appendChild(listContainer);
+      rootContainer.appendChild(historyCard);
+
+      renderSchedulePeriod(periodList[0]);
+    }
+
+    // =========================================================================
+    // 6. MODUL ABSENSI PIKET (PRATINJAU WATERMARK TIMESTAMP/GPS + TOMBOL KIRIM ABSEN)
+    // =========================================================================
+    function showAbsenPiketScreen() {
+      setScreenState("ABSEN_PIKET");
+      rootContainer.innerHTML = "";
+
+      const todayStr = getTodayFormatted();
+      const displayUser = currentUserUsername || currentUserName;
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("ABSENSI PIKET HARIAN", 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(createLabel(`Tanggal Hari Ini: ${todayStr} (Wajib Live Camera + Watermark Lokasi & Jam Live)`, 13, COLOR_MUTED, false));
+
+      let isScheduledToday = false;
+      let collectiveBeforeUrl = "-";
+      let collectiveBeforeBy = "-";
+      let myAfterStatus = "Belum After";
+      let myAfterUrl = "-";
+
+      const todayTeamCard = createCardLayout();
+      todayTeamCard.appendChild(createLabel(`Tim Piket Hari Ini (${todayStr})`, 17, COLOR_YELLOW, true));
+
+      let countTeam = 0;
+      absenPiketList.forEach((a) => {
+        const tglAbsen = normalizeDateString(optSmart(a, "Tanggal_Piket", "tanggal_piket", "Tanggal"));
+        if (tglAbsen === todayStr) {
+          countTeam++;
+          const uid = optSmart(a, "ID_User", "id_user");
+          const uName = optSmart(a, "Nama", "nama");
+          const st = optSmart(a, "Status_Kehadiran", "status_kehadiran", "Status") || "Belum After";
+          const fBefore = optSmart(a, "Foto_Before_URL", "foto_before_url");
+          const fAfter = optSmart(a, "Foto_After_URL", "foto_after_url");
+
+          if (fBefore && fBefore !== "-") {
+            collectiveBeforeUrl = fBefore;
+            collectiveBeforeBy = optSmart(a, "Before_By", "before_by");
+          }
+          if (uid.toLowerCase() === currentUserId.toLowerCase() || uName.toLowerCase() === currentUserName.toLowerCase()) {
+            isScheduledToday = true;
+            myAfterStatus = st;
+            myAfterUrl = fAfter;
+          }
+          const isHadir = st.toLowerCase().includes("berhasil") || st.toLowerCase() === "hadir";
+          todayTeamCard.appendChild(createLabel(`• ${uName} — Status: ${st}`, 14, isHadir ? COLOR_GREEN : COLOR_TEXT, true));
+        }
+      });
+
+      if (countTeam === 0) {
+        jadwalPiketList.forEach((j) => {
+          const tglJdw = normalizeDateString(optSmart(j, "Tanggal_Piket", "tanggal_piket", "Tanggal"));
+          if (tglJdw === todayStr) {
+            countTeam++;
+            const uid = optSmart(j, "ID_User", "id_user");
+            const uName = optSmart(j, "Nama", "nama");
+            if (uid.toLowerCase() === currentUserId.toLowerCase() || uName.toLowerCase() === currentUserName.toLowerCase()) {
+              isScheduledToday = true;
+            }
+            todayTeamCard.appendChild(createLabel(`• ${uName} — Terjadwal Hari Ini`, 14, COLOR_TEXT, false));
+          }
+        });
+      }
+
+      if (countTeam === 0) {
+        todayTeamCard.appendChild(createLabel("Tidak ada jadwal piket di Google Sheets untuk hari ini.", 13, COLOR_MUTED, false));
+      }
+      rootContainer.appendChild(todayTeamCard);
+
+      const actionCard = createCardLayout();
+      if (!isScheduledToday) {
+        actionCard.appendChild(createLabel(`🔒 Kamu sedang tidak memiliki jadwal piket hari ini (${todayStr}). Tombol kamera dikunci.`, 14, COLOR_YELLOW, true));
+      } else {
+        actionCard.appendChild(createLabel("✔ Kamu Terjadwal Piket Hari Ini!", 16, COLOR_GREEN, true));
+
+        // 1. BAGIAN FOTO BEFORE (KOLEKTIF)
+        actionCard.appendChild(createLabel(
+          `1. Foto BEFORE (Perwakilan 1 Orang Tim)\nStatus: ${collectiveBeforeUrl !== "-" ? "Sudah Diupload oleh " + collectiveBeforeBy : "Belum Diupload"}`,
+          13, COLOR_TEXT, false
+        ));
+        if (collectiveBeforeUrl && collectiveBeforeUrl.startsWith("http")) {
+          actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto BEFORE (Ber-Timestamp & GPS)", () => {
+            window.open(collectiveBeforeUrl, "_blank");
+          }));
+        }
+
+        let pendingBeforeB64 = "";
+        const ivPreviewBefore = document.createElement("img");
+        ivPreviewBefore.className = "img-preview";
+
+        const btnKirimBefore = createPrimaryButton("📤 KIRIM FOTO BEFORE SEKARANG", () => {
+          if (!pendingBeforeB64) return;
+          toast("Mengunggah Foto BEFORE ke Google Drive...");
+          submitPiketPhoto("BEFORE", todayStr, pendingBeforeB64);
+        });
+        btnKirimBefore.style.display = "none";
+
+        actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO BEFORE", () => {
+          captureLiveCameraWithPreview((dataUrl, b64) => {
+            pendingBeforeB64 = b64;
+            ivPreviewBefore.src = dataUrl;
+            ivPreviewBefore.style.display = "block";
+            btnKirimBefore.style.display = "block";
+            toast("Foto BEFORE diambil beserta Timestamp & GPS! Klik tombol KIRIM di bawahnya.");
+          });
+        }));
+        actionCard.appendChild(ivPreviewBefore);
+        actionCard.appendChild(btnKirimBefore);
+
+        // 2. BAGIAN FOTO AFTER (WAJIB INDIVIDU + TOMBOL KIRIM ABSEN)
+        const isAlreadySent = myAfterStatus.toLowerCase().includes("berhasil") || myAfterStatus.toLowerCase() === "hadir";
+        const formattedMyStatus = isAlreadySent
+          ? `absen berhasil di kirim terimakasih ${displayUser}`
+          : myAfterStatus;
+
+        actionCard.appendChild(createLabel("\n2. Foto AFTER (Wajib Masing-Masing Individu!)", 15, COLOR_YELLOW, true));
+        actionCard.appendChild(createLabel(`Status Kamu: ${formattedMyStatus}`, 14, isAlreadySent ? COLOR_GREEN : COLOR_YELLOW, true));
+        actionCard.appendChild(createLabel("⚠️ Peringatan: Bolos / Tidak kirim absen Foto After otomatis denda Rp 20.000!", 12, COLOR_MUTED, false));
+
+        if (myAfterUrl && myAfterUrl.startsWith("http")) {
+          actionCard.appendChild(createSecondaryButton("🔍 Lihat Foto AFTER Kamu (Ber-Timestamp & GPS)", () => {
+            window.open(myAfterUrl, "_blank");
+          }));
+        }
+
+        let pendingAfterB64 = "";
+        const ivPreviewAfter = document.createElement("img");
+        ivPreviewAfter.className = "img-preview";
+        const tvPreviewInfo = createLabel("", 12, COLOR_GREEN, true);
+        tvPreviewInfo.style.display = "none";
+
+        const btnKirimAbsenAfter = createPrimaryButton("✅ KIRIM ABSEN PIKET SEKARANG", () => {
+          if (!pendingAfterB64) {
+            toast("Ambil Live Foto After terlebih dahulu!");
+            return;
+          }
+          toast("Mengirim absen piket...");
+          submitPiketPhoto("AFTER", todayStr, pendingAfterB64);
+        });
+        btnKirimAbsenAfter.style.display = "none";
+
+        actionCard.appendChild(createPrimaryButton("📸 AMBIL LIVE FOTO AFTER", () => {
+          if (collectiveBeforeUrl === "-" && !pendingBeforeB64) {
+            toast("Tim piket harus mengunggah Foto Before terlebih dahulu!");
+            return;
+          }
+          captureLiveCameraWithPreview((dataUrl, b64) => {
+            pendingAfterB64 = b64;
+            ivPreviewAfter.src = dataUrl;
+            ivPreviewAfter.style.display = "block";
+            tvPreviewInfo.textContent = "✔ Foto Live + Watermark Tanggal, Jam & Lokasi GPS siap dikirim! Silakan klik tombol KIRIM ABSEN di bawah:";
+            tvPreviewInfo.style.display = "block";
+            btnKirimAbsenAfter.style.display = "block";
+          });
+        }));
+        actionCard.appendChild(ivPreviewAfter);
+        actionCard.appendChild(tvPreviewInfo);
+        actionCard.appendChild(btnKirimAbsenAfter);
+      }
+
+      if (["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim"].includes(currentUserRole)) {
+        actionCard.appendChild(createSecondaryButton("⚡ Proses Evaluasi Bolos Piket -> Denda Rp 20.000", () => {
+          ApiService.post({
+            action: "triggerCheckDendaPiket",
+            tanggalPiket: todayStr
+          }, (res) => {
+            toast(res.message || "Evaluasi denda selesai");
+            refreshAllDataAndShow(() => showAbsenPiketScreen());
+          });
+        }));
+      }
+
+      rootContainer.appendChild(actionCard);
+    }
+
+    function submitPiketPhoto(tipeFoto, tanggal, base64Image) {
+      const gps = getCurrentGpsString();
+      const displayUsername = currentUserUsername || currentUserName;
+      ApiService.post({
+        action: "submitAbsenPiket",
+        tipeFoto: tipeFoto,
+        tanggalPiket: tanggal,
+        userId: currentUserId,
+        nama: currentUserName,
+        username: displayUsername,
+        gpsLocation: gps,
+        base64Image: base64Image
+      }, (res) => {
+        const msg = (tipeFoto === "AFTER" && res.status === "success")
+          ? `absen berhasil di kirim terimakasih ${displayUsername}`
+          : (res.message || "Terkirim");
+        toast(msg);
+        refreshAllDataAndShow(() => showAbsenPiketScreen());
+      });
+    }
+
+    // =========================================================================
+    // 7. MODUL DENDA (TAGIHAN OTOMATIS RP 20.000 & UPLOAD BUKTI BAYAR)
+    // =========================================================================
+    function showDendaScreen() {
+      setScreenState("DENDA");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("MENU DENDA PIKET (RP 20.000)", 22, COLOR_YELLOW, true));
+      rootContainer.appendChild(createPaymentInfoDisplayCard());
+
+      const dendaCard = createCardLayout();
+      dendaCard.appendChild(createLabel("Daftar Tagihan Denda Piket", 17, COLOR_YELLOW, true));
+
+      let count = 0;
+      dendaList.forEach((d) => {
+        const dUid = optSmart(d, "ID_User", "id_user");
+        const dNama = optSmart(d, "Nama", "nama");
+        const isMine = dUid.toLowerCase() === currentUserId.toLowerCase() || dNama.toLowerCase() === currentUserName.toLowerCase();
+        const isAdminOrBendahara = ["Super Admin", "Bendahara", "Ketua Organisasi"].includes(currentUserRole);
+        if (isMine || isAdminOrBendahara) {
+          count++;
+          const idDenda = optSmart(d, "ID_Denda", "id_denda");
+          const alasan = optSmart(d, "Alasan_Denda", "alasan_denda");
+          const st = optSmart(d, "Status", "status");
+          dendaCard.appendChild(createLabel(
+            `${dNama} — ${alasan}\nNominal: Rp 20.000 | Status: ${st}`,
+            14,
+            st.toLowerCase() === "approved" ? COLOR_GREEN : COLOR_RED,
+            true
+          ));
+
+          if (isMine && ["Belum Bayar", "Declined"].includes(st)) {
+            dendaCard.appendChild(createPrimaryButton(`📤 Upload Bukti Bayar Denda (${idDenda})`, () => {
+              pickFromGallery((b64) => {
+                ApiService.post({
+                  action: "submitBayarDenda",
+                  idDenda: idDenda,
+                  nama: currentUserName,
+                  base64Image: b64
+                }, (res) => {
+                  toast(res.message || "Bukti bayar denda terkirim");
+                  refreshAllDataAndShow(() => showDendaScreen());
+                });
+              });
+            }));
+          }
+        }
+      });
+
+      if (count === 0) {
+        dendaCard.appendChild(createLabel("🎉 Tidak ada tagihan denda aktif di Google Sheets.", 14, COLOR_GREEN, false));
+      }
+      rootContainer.appendChild(dendaCard);
+    }
+
+    // =========================================================================
+    // 8. MODUL USER SETTING (SUPER ADMIN & BENDAHARA)
+    // =========================================================================
+    function showUserSettingScreen() {
+      setScreenState("USER_SETTING");
+      rootContainer.innerHTML = "";
+
+      rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
+      rootContainer.appendChild(createLabel("MANAJEMEN USER SETTING", 22, COLOR_YELLOW, true));
+
+      const roles = ["Super Admin", "Bendahara", "Ketua Organisasi", "Wakahim", "User Biasa"];
+
+      usersList.forEach((u) => {
+        const uid = getUserIdSmart(u);
+        const uName = getUserNameSmart(u);
+        const uDiv = getUserDivisiSmart(u);
+        const uUsername = getUsernameSmart(u);
+        const uOldPass = getOldPassSmart(u);
+        const uActivePass = getActivePassSmart(u);
+        const uRole = getUserRoleSmart(u);
+
+        const uCard = createCardLayout();
+        uCard.appendChild(createLabel(`${uName} (${uUsername})`, 16, COLOR_YELLOW, true));
+        uCard.appendChild(createLabel(`ID: ${uid} | Jabatan: ${uDiv}`, 13, COLOR_TEXT, false));
+        uCard.appendChild(createLabel(`Password Sebelumnya: ${uOldPass} | Password Aktif: ${uActivePass}`, 13, COLOR_GREEN, true));
+
+        const spRole = createSpinner(roles);
+        const currentRoleIdx = roles.findIndex((r) => r.toLowerCase() === uRole.toLowerCase());
+        if (currentRoleIdx >= 0) spRole.selectedIndex = currentRoleIdx;
+
+        const etNewPass = createInput("Masukkan Password Baru (kosongkan jika tetap)");
+
+        const btnSaveUser = createPrimaryButton(`💾 Update Akun ${uName}`, () => {
+          ApiService.post({
+            action: "updateUserSetting",
+            targetUserId: uid,
+            targetUserName: uName,
+            newRole: spRole.value,
+            newPassword: etNewPass.value.trim()
+          }, (res) => {
+            toast(res.message || "Data user diperbarui");
+            refreshAllDataAndShow(() => showUserSettingScreen());
+          });
+        });
+
+        uCard.appendChild(spRole);
+        uCard.appendChild(etNewPass);
+        uCard.appendChild(btnSaveUser);
+        rootContainer.appendChild(uCard);
+      });
+    }
+
+    // =========================================================================
+    // HELPER KAMERA LIVE + WATERMARK TANGGAL, JAM LIVE & LOKASI GPS (CANVAS)
+    // =========================================================================
+    let activeStream = null;
+    let currentFacingMode = "environment";
+
+    function pickFromGallery(callback) {
+      const inp = document.getElementById("inputGallery");
+      inp.value = "";
+      inp.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        imageFileToBase64(file, false, (_, b64) => callback(b64));
+      };
+      inp.click();
+    }
+
+    function captureLiveCameraWithPreview(callback) {
+      openLiveCameraModal(true, (dataUrl, b64) => {
+        callback(dataUrl, b64);
+      });
+    }
+
+    function showPhotoOrDocumentChooser(callback) {
+      const modal = document.getElementById("chooserModal");
+      modal.classList.add("active");
+
+      const closeChooser = () => modal.classList.remove("active");
+
+      document.getElementById("optLiveCam").onclick = () => {
+        closeChooser();
+        openLiveCameraModal(false, (dataUrl, b64) => {
+          callback(b64, "image/jpeg", "jpg", "Foto Kamera Langsung");
+        });
+      };
+
+      document.getElementById("optGallery").onclick = () => {
+        closeChooser();
+        const inp = document.getElementById("inputGallery");
+        inp.value = "";
+        inp.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          imageFileToBase64(file, false, (_, b64) => {
+            callback(b64, "image/jpeg", "jpg", "Foto Galeri");
+          });
+        };
+        inp.click();
+      };
+
+      document.getElementById("optDocument").onclick = () => {
+        closeChooser();
+        const inp = document.getElementById("inputDocument");
+        inp.value = "";
+        inp.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const mimeType = file.type || "application/pdf";
+          const displayName = file.name || "Dokumen_Nota";
+          const ext = displayName.includes(".")
+            ? displayName.split(".").pop()
+            : (mimeType.includes("pdf") ? "pdf" : "jpg");
+          const reader = new FileReader();
+          reader.onload = () => {
+            const rawB64 = String(reader.result).split(",")[1] || "";
+            callback(rawB64, mimeType, ext, displayName);
+          };
+          reader.readAsDataURL(file);
+        };
+        inp.click();
+      };
+
+      document.getElementById("optCancelChooser").onclick = closeChooser;
+    }
+
+    async function openLiveCameraModal(withWatermark, onCaptured) {
+      requestNecessaryPermissions();
+      const modal = document.getElementById("liveCamModal");
+      const video = document.getElementById("cameraVideo");
+
+      async function startStream() {
+        if (activeStream) {
+          activeStream.getTracks().forEach((t) => t.stop());
+        }
+        try {
+          activeStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentFacingMode },
+            audio: false
+          });
+          video.srcObject = activeStream;
+          modal.classList.add("active");
+        } catch (err) {
+          // Fallback ke Native Camera Input jika izin webcam browser ditolak
+          const inpCam = document.getElementById("inputNativeCamera");
+          inpCam.value = "";
+          inpCam.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            imageFileToBase64(file, withWatermark, (dataUrl, b64) => onCaptured(dataUrl, b64));
+          };
+          inpCam.click();
+        }
+      }
+
+      function stopAndClose() {
+        if (activeStream) {
+          activeStream.getTracks().forEach((t) => t.stop());
+          activeStream = null;
+        }
+        modal.classList.remove("active");
+      }
+
+      document.getElementById("btnSwitchCam").onclick = () => {
+        currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+        startStream();
+      };
+
+      document.getElementById("btnCloseCam").onclick = stopAndClose;
+
+      document.getElementById("btnSnapPhoto").onclick = () => {
+        const canvas = document.createElement("canvas");
+        const rawW = video.videoWidth || 720;
+        const rawH = video.videoHeight || 960;
+        canvas.width = rawW;
+        canvas.height = rawH;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, rawW, rawH);
+        stopAndClose();
+
+        const finalCanvas = withWatermark ? stampWatermarkOnCanvas(canvas) : canvas;
+        const dataUrl = finalCanvas.toDataURL("image/jpeg", 0.85);
+        const b64 = dataUrl.split(",")[1];
+        onCaptured(dataUrl, b64);
+      };
+
+      await startStream();
+    }
+
+    function imageFileToBase64(file, withWatermark, callback) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          const finalCanvas = withWatermark ? stampWatermarkOnCanvas(canvas) : canvas;
+          const dataUrl = finalCanvas.toDataURL("image/jpeg", 0.85);
+          const b64 = dataUrl.split(",")[1];
+          callback(dataUrl, b64);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * Menempelkan Watermark Tanggal Live, Jam Live (WIB), dan Lokasi GPS persis seperti stampWatermarkOnBitmap di Android
+     */
+    function stampWatermarkOnCanvas(srcCanvas) {
+      const targetWidth = Math.max(srcCanvas.width, 720);
+      const scaleRatio = targetWidth / srcCanvas.width;
+      const targetHeight = Math.round(srcCanvas.height * scaleRatio);
+
+      const outCanvas = document.createElement("canvas");
+      outCanvas.width = targetWidth;
+      outCanvas.height = targetHeight;
+      const ctx = outCanvas.getContext("2d");
+
+      ctx.drawImage(srcCanvas, 0, 0, targetWidth, targetHeight);
+
+      const bannerHeight = Math.max(Math.round(targetHeight * 0.24), 130);
+      const bannerTop = targetHeight - bannerHeight;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.84)";
+      ctx.fillRect(0, bannerTop, targetWidth, bannerHeight);
+
+      ctx.strokeStyle = COLOR_RED;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(0, bannerTop);
+      ctx.lineTo(targetWidth, bannerTop);
+      ctx.stroke();
+
+      const now = new Date();
+      const liveDate = now.toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+      const liveTime = now.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).replace(/\./g, ":") + " WIB";
+
+      const gps = getCurrentGpsString();
+      const userTag = currentUserUsername || currentUserName;
+
+      ctx.font = "bold 24px Roboto, sans-serif";
+      ctx.fillStyle = COLOR_YELLOW;
+      ctx.fillText(`HMSI LIVE PIKET — @${userTag}`, 20, bannerTop + 36);
+
+      ctx.font = "bold 20px Roboto, sans-serif";
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(`Tanggal & Jam: ${liveDate} | ${liveTime}`, 20, bannerTop + 70);
+      ctx.fillText(`Lokasi GPS: ${gps}`, 20, bannerTop + 104);
+
+      return outCanvas;
+    }
+
+    function getCurrentGpsString() {
+      return currentGpsCoordinates || "-6.22970, 106.92420 (Sekretariat HMSI)";
+    }
+
+    // =========================================================================
+    // HELPER PINTAR CASE-INSENSITIVE & NORMALISASI TANGGAL (100% SAMA DENGAN ANDROID)
+    // =========================================================================
+    function optSmart(obj, ...candidates) {
+      if (!obj || typeof obj !== "object") return "";
+      for (const c of candidates) {
+        if (obj[c] !== undefined && obj[c] !== null) {
+          const v = String(obj[c]).trim();
+          if (v !== "" && v !== "null") return v;
+        }
+      }
+      const keys = Object.keys(obj);
+      for (const c of candidates) {
+        const matchedKey = keys.find((k) => k.trim().toLowerCase() === c.trim().toLowerCase());
+        if (matchedKey !== undefined) {
+          const v = String(obj[matchedKey]).trim();
+          if (v !== "" && v !== "null") return v;
+        }
+      }
+      return "";
+    }
+
+    function normalizeDateString(raw) {
+      const s = String(raw || "").trim();
+      if (!s) return "";
+      if (s.includes("T") && s.endsWith("Z")) {
+        try {
+          const parsed = new Date(s);
+          if (!isNaN(parsed.getTime())) {
+            const wibTime = new Date(parsed.getTime() + 7 * 60 * 60 * 1000);
+            return wibTime.toISOString().substring(0, 10);
+          }
+        } catch (e) {}
+      }
+      const match = s.match(/(\d{4}-\d{2}-\d{2})/);
+      if (match) return match[1];
+      return s.substring(0, 10);
+    }
+
+    function normalizeMonthString(rawMonth, normalizedDate) {
+      if (normalizedDate && normalizedDate.length >= 7 && normalizedDate[4] === "-") {
+        return normalizedDate.substring(0, 7);
+      }
+      const s = String(rawMonth || "").trim();
+      const match = s.match(/(\d{4}-\d{2})/);
+      if (match) return match[1];
+      return "";
+    }
+
+    function getUserIdSmart(u) {
+      const v = optSmart(u, "ID_User", "id_user", "ID", "id", "No", "NO");
+      if (v) return v;
+      const keys = Object.keys(u || {});
+      return keys.length > 0 ? String(u[keys[0]]).trim() : "-";
+    }
+
+    function getUserNameSmart(u) {
+      const v = optSmart(u, "Nama", "nama", "NAMA", "Name", "Username", "username");
+      if (v) return v;
+      const keys = Object.keys(u || {});
+      return keys.length > 1 ? String(u[keys[1]] || "Anggota HMSI").trim() : "Anggota HMSI";
+    }
+
+    function getUserDivisiSmart(u) {
+      const v = optSmart(u, "Divisi_Jabatan", "divisi_jabatan", "Jabatan/Divisi", "Divisi", "divisi", "Jabatan", "Role", "role");
+      return v || "Pengurus HMSI";
+    }
+
+    function getUserRoleSmart(u) {
+      return optSmart(u, "Role", "role", "ROLE", "Status_Akun") || "User Biasa";
+    }
+
+    function getUsernameSmart(u) {
+      return optSmart(u, "Username", "username", "USERNAME") || getUserNameSmart(u).toLowerCase().replace(/\s+/g, "");
+    }
+
+    function getOldPassSmart(u) {
+      return optSmart(u, "Password_Lama", "password_lama", "Password_Aktif", "password_aktif") || "hmsi123";
+    }
+
+    function getActivePassSmart(u) {
+      return optSmart(u, "Password_Aktif", "password_aktif", "Password", "password") || "hmsi123";
+    }
+
+    function getTodayFormatted() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    // =========================================================================
+    // HELPER UI BUILDER (IDENTIK DENGAN FUNGSI HELPER DI MainActivity.kt)
+    // =========================================================================
+    function createSquareGridMenu(items) {
+      const grid = document.createElement("div");
+      grid.className = "square-grid";
+      items.forEach(([iconEmoji, title, onClick]) => {
+        const tile = document.createElement("div");
+        tile.className = "square-tile";
+        tile.onclick = onClick;
+
+        const tvIcon = document.createElement("div");
+        tvIcon.className = "tile-icon";
+        tvIcon.textContent = iconEmoji;
+
+        const tvTitle = document.createElement("div");
+        tvTitle.className = "tile-title";
+        tvTitle.textContent = title;
+
+        tile.appendChild(tvIcon);
+        tile.appendChild(tvTitle);
+        grid.appendChild(tile);
+      });
+      return grid;
+    }
+
+    function createCardLayout(bgColor = COLOR_CARD) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.backgroundColor = bgColor;
+      return card;
+    }
+
+    function createLabel(txt, sizePx, color, isBold) {
+      const tv = document.createElement("div");
+      tv.className = "label";
+      tv.textContent = txt;
+      tv.style.fontSize = sizePx + "px";
+      tv.style.color = color;
+      if (isBold) tv.style.fontWeight = "700";
+      return tv;
+    }
+
+    function createInput(hintText, isPassword = false, isNumber = false) {
+      const et = document.createElement("input");
+      et.className = "input-field";
+      et.placeholder = hintText;
+      et.type = isPassword ? "password" : isNumber ? "number" : "text";
+      return et;
+    }
+
+    function createSpinner(items) {
+      const sp = document.createElement("select");
+      sp.className = "spinner-field";
+      items.forEach((item) => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        sp.appendChild(opt);
+      });
+      return sp;
+    }
+
+    function createPrimaryButton(label, onClick) {
+      const btn = document.createElement("button");
+      btn.className = "btn-primary";
+      btn.textContent = label;
+      btn.onclick = onClick;
+      return btn;
+    }
+
+    function createSecondaryButton(label, onClick) {
+      const btn = document.createElement("button");
+      btn.className = "btn-secondary";
+      btn.textContent = label;
+      btn.onclick = onClick;
+      return btn;
+    }
+
+    function formatRupiah(amount) {
+      const num = Number(amount) || 0;
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(num);
+    }
+
+    let toastTimer = null;
+    function toast(msg) {
+      if (!msg) return;
+      const box = document.getElementById("toastBox");
+      box.textContent = msg;
+      box.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.remove("show");
+      }, 2800);
+    }
+  </script>
+</body>
+</html>
