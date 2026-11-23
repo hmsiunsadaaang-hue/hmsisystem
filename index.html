@@ -1409,7 +1409,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3B: INPUT PENGELUARAN
+    // ANAK MENU ACCOUNTING 3B: INPUT PENGELUARAN (DENGAN PREVIEW FOTO NOTA)
     // -------------------------------------------------------------------------
     function showAccSubInputExpense() {
       setScreenState("ACC_SUB_EXPENSE");
@@ -1431,6 +1431,9 @@
       let notaExt = "jpg";
       const tvStatus = createLabel("Belum ada foto/dokumen nota dipilih", 12, COLOR_MUTED, false);
 
+      const ivPreviewNota = document.createElement("img");
+      ivPreviewNota.className = "img-preview";
+
       const btnNota = createSecondaryButton("📎 AMBIL FOTO LANGSUNG / PILIH DOKUMEN NOTA (WAJIB)", () => {
         showPhotoOrDocumentChooser((b64, mime, ext, labelName) => {
           notaB64 = b64;
@@ -1438,6 +1441,12 @@
           notaExt = ext;
           tvStatus.textContent = `✔ Bukti Terpilih: ${labelName} (.${ext})`;
           tvStatus.style.color = COLOR_GREEN;
+          if (mime && mime.toLowerCase().startsWith("image/")) {
+            ivPreviewNota.src = `data:${mime};base64,${b64}`;
+            ivPreviewNota.style.display = "block";
+          } else {
+            ivPreviewNota.style.display = "none";
+          }
         });
       });
 
@@ -1468,6 +1477,7 @@
       formCard.appendChild(etDesk);
       formCard.appendChild(etNom);
       formCard.appendChild(btnNota);
+      formCard.appendChild(ivPreviewNota);
       formCard.appendChild(tvStatus);
       formCard.appendChild(btnSimpan);
       rootContainer.appendChild(formCard);
@@ -1928,7 +1938,7 @@
     }
 
     // =========================================================================
-    // 4. MODUL UANG KAS (TUNAI & NON-TUNAI + RIWAYAT FILTER PER USER LOGIN)
+    // 4. MODUL UANG KAS (TUNAI & NON-TUNAI + PREVIEW FOTO + FILTER PER USER LOGIN)
     // =========================================================================
     function showUangKasScreen() {
       setScreenState("UANG_KAS");
@@ -1954,9 +1964,15 @@
       let buktiKasB64 = "";
       const tvStatusFoto = createLabel("Wajib upload foto bukti bayar untuk Non-Tunai", 12, COLOR_MUTED, false);
 
+      // Preview Foto Bukti Bayar Uang Kas
+      const ivPreviewKas = document.createElement("img");
+      ivPreviewKas.className = "img-preview";
+
       const btnPilihBukti = createSecondaryButton("📷 Pilih Foto Bukti Transfer (Wajib)", () => {
-        pickFromGallery((b64) => {
+        pickFromGallery((b64, dataUrl) => {
           buktiKasB64 = b64;
+          ivPreviewKas.src = dataUrl;
+          ivPreviewKas.style.display = "block";
           tvStatusFoto.textContent = "✔ Foto Bukti Kas Siap Dikirim";
           tvStatusFoto.style.color = COLOR_GREEN;
         });
@@ -1976,7 +1992,7 @@
       });
 
       const btnKirimKas = createPrimaryButton("KIRIM PENGAJUAN UANG KAS (RP 20.000)", () => {
-        const isTunai = spMetode.selectedIndex === 1;
+        const isTunai = spMetode.selectedItemPosition === 1 || spMetode.selectedIndex === 1;
         const metodeLabel = isTunai ? "Tunai" : "Non-Tunai";
         if (!isTunai && !buktiKasB64) {
           toast("Pembayaran Non-Tunai wajib mengunggah foto bukti transfer!");
@@ -2001,6 +2017,7 @@
       uploadCard.appendChild(spBulan);
       uploadCard.appendChild(spMetode);
       uploadCard.appendChild(btnPilihBukti);
+      uploadCard.appendChild(ivPreviewKas);
       uploadCard.appendChild(tvStatusFoto);
       uploadCard.appendChild(btnKirimKas);
       rootContainer.appendChild(uploadCard);
@@ -2751,7 +2768,7 @@
     }
 
     // =========================================================================
-    // 7. MODUL DENDA (TAGIHAN OTOMATIS RP 20.000 & UPLOAD BUKTI BAYAR)
+    // 7. MODUL DENDA (TAGIHAN OTOMATIS RP 20.000 & PREVIEW FOTO BUKTI BAYAR)
     // =========================================================================
     function showDendaScreen() {
       setScreenState("DENDA");
@@ -2783,19 +2800,42 @@
           ));
 
           if (isMine && ["Belum Bayar", "Declined"].includes(st)) {
-            dendaCard.appendChild(createPrimaryButton(`📤 Upload Bukti Bayar Denda (${idDenda})`, () => {
-              pickFromGallery((b64) => {
-                ApiService.post({
-                  action: "submitBayarDenda",
-                  idDenda: idDenda,
-                  nama: currentUserName,
-                  base64Image: b64
-                }, (res) => {
-                  toast(res.message || "Bukti bayar denda terkirim");
-                  refreshAllDataAndShow(() => showDendaScreen());
-                });
+            let buktiDendaB64 = "";
+            const ivPreviewDenda = document.createElement("img");
+            ivPreviewDenda.className = "img-preview";
+
+            const tvStatusDenda = createLabel("", 12, COLOR_GREEN, true);
+            tvStatusDenda.style.display = "none";
+
+            const btnKirimDenda = createPrimaryButton(`✅ KIRIM BUKTI BAYAR DENDA (${idDenda})`, () => {
+              if (!buktiDendaB64) return;
+              btnKirimDenda.disabled = true;
+              btnKirimDenda.textContent = "⏳ Mengirim...";
+              ApiService.post({
+                action: "submitBayarDenda",
+                idDenda: idDenda,
+                nama: currentUserName,
+                base64Image: buktiDendaB64
+              }, (res) => {
+                toast(res.message || "Bukti bayar denda terkirim");
+                refreshAllDataAndShow(() => showDendaScreen());
+              });
+            });
+            btnKirimDenda.style.display = "none";
+
+            dendaCard.appendChild(createSecondaryButton(`📷 Pilih Foto Bukti Bayar Denda (${idDenda})`, () => {
+              pickFromGallery((b64, dataUrl) => {
+                buktiDendaB64 = b64;
+                ivPreviewDenda.src = dataUrl;
+                ivPreviewDenda.style.display = "block";
+                tvStatusDenda.textContent = "✔ Foto Bukti Denda Siap Dikirim:";
+                tvStatusDenda.style.display = "block";
+                btnKirimDenda.style.display = "block";
               });
             }));
+            dendaCard.appendChild(ivPreviewDenda);
+            dendaCard.appendChild(tvStatusDenda);
+            dendaCard.appendChild(btnKirimDenda);
           }
         }
       });
@@ -2969,7 +3009,7 @@
       inp.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        imageFileToBase64(file, false, (_, b64) => callback(b64));
+        imageFileToBase64(file, false, (dataUrl, b64) => callback(b64, dataUrl));
       };
       inp.click();
     }
