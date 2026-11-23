@@ -34,7 +34,6 @@
       overflow-x: hidden;
     }
 
-    /* Container Web Lebar agar kotak menu bisa berjejer ke samping dengan leluasa */
     #rootContainer {
       width: 100%;
       max-width: 1140px;
@@ -45,7 +44,6 @@
       flex-direction: column;
     }
 
-    /* Wrapper khusus Login agar tetap fokus dan rapi di tengah layar */
     .login-wrapper {
       width: 100%;
       max-width: 440px;
@@ -56,7 +54,6 @@
       align-items: center;
     }
 
-    /* Bingkai Lingkaran Emas untuk Logo HMSI di Halaman Login */
     .logo-circle-frame {
       width: 124px;
       height: 124px;
@@ -84,7 +81,6 @@
       line-height: 1;
     }
 
-    /* Top Header & Balance Row berjejer di layar lebar */
     .top-dashboard-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -175,12 +171,18 @@
       transition: transform 0.1s ease, opacity 0.15s ease;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       opacity: 0.92;
     }
 
-    .btn-primary:active {
+    .btn-primary:active:not(:disabled) {
       transform: scale(0.99);
+    }
+
+    .btn-primary:disabled,
+    .btn-secondary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .btn-secondary {
@@ -198,7 +200,7 @@
       transition: background-color 0.15s ease;
     }
 
-    .btn-secondary:hover {
+    .btn-secondary:hover:not(:disabled) {
       background-color: #3f4f66;
     }
 
@@ -212,12 +214,10 @@
 
     .btn-row > button {
       flex: 1;
-      min-width: 180px;
+      min-width: 150px;
     }
 
-    /* =========================================================================
-       GRID MENU KOTAK 1:1 BERJEJER KE SAMPING (HORIZONTAL ROW LAYOUT)
-       ========================================================================= */
+    /* GRID MENU KOTAK 1:1 BERJEJER KE SAMPING */
     .square-grid {
       display: flex;
       flex-direction: row;
@@ -271,7 +271,6 @@
       line-height: 1.3;
     }
 
-    /* Responsif di layar HP: tetap berjejer ke samping (3 atau 2 kotak per baris) */
     @media (max-width: 640px) {
       #rootContainer {
         padding: 18px 14px 40px 14px;
@@ -288,7 +287,6 @@
       }
     }
 
-    /* Grid untuk daftar kartu user agar ikut berjejer rapi di layar lebar */
     .users-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -300,7 +298,6 @@
       margin-bottom: 0;
     }
 
-    /* Baris Checklist Monitoring Piket */
     .checkbox-row {
       display: flex;
       align-items: center;
@@ -323,7 +320,6 @@
       color: var(--color-yellow);
     }
 
-    /* Preview Foto Live Camera */
     .img-preview {
       width: 100%;
       max-height: 340px;
@@ -334,7 +330,6 @@
       display: none;
     }
 
-    /* Toast Android Style */
     #toastBox {
       position: fixed;
       bottom: 32px;
@@ -359,11 +354,10 @@
       opacity: 1;
     }
 
-    /* Modal Dialog Android AlertDialog + Live Camera Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.78);
       display: none;
       align-items: center;
       justify-content: center;
@@ -380,11 +374,13 @@
       border: 1px solid var(--color-yellow);
       border-radius: 14px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
       padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .dialog-title {
@@ -431,6 +427,18 @@
   <div id="rootContainer"></div>
   <div id="toastBox"></div>
 
+  <!-- Modal Dinamis untuk Konfirmasi Hapus & Form Edit Riwayat Super Admin -->
+  <div id="customDialogModal" class="modal-overlay">
+    <div class="dialog-box">
+      <div class="dialog-title" id="customDialogTitle"></div>
+      <div id="customDialogBody"></div>
+      <div class="btn-row">
+        <button class="btn-primary" id="customDialogConfirm">Ya</button>
+        <button class="btn-secondary" id="customDialogCancel">Batal</button>
+      </div>
+    </div>
+  </div>
+
   <!-- AlertDialog Pengingat Belum Bayar Uang Kas Saat Buka Aplikasi -->
   <div id="kasAlertModal" class="modal-overlay">
     <div class="dialog-box">
@@ -443,7 +451,7 @@
     </div>
   </div>
 
-  <!-- AlertDialog Pemilih Bukti Bayar / Nota (Persis showPhotoOrDocumentChooser di Android) -->
+  <!-- AlertDialog Pemilih Bukti Bayar / Nota -->
   <div id="chooserModal" class="modal-overlay">
     <div class="dialog-box">
       <div class="dialog-title">Pilih Sumber Bukti Bayar / Nota</div>
@@ -467,18 +475,17 @@
     </div>
   </div>
 
-  <!-- Hidden File Inputs untuk Galeri, Kamera Native HP, & Dokumen PDF -->
+  <!-- Hidden File Inputs -->
   <input type="file" id="inputGallery" accept="image/*" style="display:none" />
   <input type="file" id="inputNativeCamera" accept="image/*" capture="environment" style="display:none" />
   <input type="file" id="inputDocument" accept="application/pdf,image/*" style="display:none" />
 
   <script>
     // =========================================================================
-    // KONFIGURASI API SERVICE & LOGO GITHUB (SESUAI REPO hmsisystem)
+    // KONFIGURASI API SERVICE & LOGO GITHUB (SINKRON DENGAN ApiService.kt)
     // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCPLMFQcn3mo44mp1l5tu62L61PRnMhUvxnNYOUbN_tcTyxP0gfnsHF3vYECtxt2mImQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGhZ7MstNmdq8bh7fVxZK00EseRm4RxdATzihYPlntrIfpMjVlGDuLxsjXAPAs95RxKw/exec";
 
-    // Urutan prioritas file logo di repositori GitHub hmsiunsadaaang-hue/hmsisystem
     const LOGO_CANDIDATES = [
       "logo-hmsi.png",
       "logo_hmsi.png",
@@ -529,6 +536,7 @@
     let currentUserRole = "";
     let currentUserDivisi = "";
     let hasShownInitialKasPopup = false;
+    let isSubmittingVerification = false;
 
     let startingBalance = 0;
     let startingBalanceHistoryList = [];
@@ -578,12 +586,10 @@
       return allowedRoles.some((r) => String(r).trim().toLowerCase() === cleanRole);
     }
 
-    // Super Admin, Ketua Organisasi, dan Wakahim memiliki akses ke SEMUA MENU
     function isFullAccessRole() {
       return hasRole("Super Admin", "Ketua Organisasi", "Wakahim");
     }
 
-    // Super Admin, Ketua Organisasi, Wakahim, dan Bendahara memiliki akses ke Accounting
     function isAccountingAccessRole() {
       return isFullAccessRole() || hasRole("Bendahara");
     }
@@ -640,7 +646,59 @@
     }
 
     // =========================================================================
-    // SISTEM NOTIFIKASI BAR HP/BROWSER & POPUP PENGINGAT (UANG KAS & PIKET)
+    // CUSTOM ALERTDIALOG HELPER (KONFIRMASI HAPUS & FORM EDIT SUPER ADMIN)
+    // =========================================================================
+    function showCustomConfirmDialog(title, message, confirmLabel, onConfirm) {
+      const modal = document.getElementById("customDialogModal");
+      const titleEl = document.getElementById("customDialogTitle");
+      const bodyEl = document.getElementById("customDialogBody");
+      const btnConfirm = document.getElementById("customDialogConfirm");
+      const btnCancel = document.getElementById("customDialogCancel");
+
+      titleEl.textContent = title;
+      bodyEl.innerHTML = "";
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "dialog-message";
+      msgDiv.textContent = message;
+      bodyEl.appendChild(msgDiv);
+
+      btnConfirm.textContent = confirmLabel || "Ya";
+      modal.classList.add("active");
+
+      btnConfirm.onclick = () => {
+        modal.classList.remove("active");
+        onConfirm();
+      };
+      btnCancel.onclick = () => {
+        modal.classList.remove("active");
+      };
+    }
+
+    function showCustomFormDialog(title, bodyElements, confirmLabel, onConfirm) {
+      const modal = document.getElementById("customDialogModal");
+      const titleEl = document.getElementById("customDialogTitle");
+      const bodyEl = document.getElementById("customDialogBody");
+      const btnConfirm = document.getElementById("customDialogConfirm");
+      const btnCancel = document.getElementById("customDialogCancel");
+
+      titleEl.textContent = title;
+      bodyEl.innerHTML = "";
+      bodyElements.forEach((el) => bodyEl.appendChild(el));
+
+      btnConfirm.textContent = confirmLabel || "Simpan";
+      modal.classList.add("active");
+
+      btnConfirm.onclick = () => {
+        modal.classList.remove("active");
+        onConfirm();
+      };
+      btnCancel.onclick = () => {
+        modal.classList.remove("active");
+      };
+    }
+
+    // =========================================================================
+    // SISTEM NOTIFIKASI & POPUP PENGINGAT (UANG KAS & PIKET)
     // =========================================================================
     function getCurrentIndonesianMonthName() {
       const monthNames = [
@@ -721,7 +779,7 @@
         triggerBrowserNotification(
           "HMSI_KAS_ALERT",
           `💵 Tagihan Uang Kas Bulan ${currentMonthName}`,
-          `Halo ${currentUserName}, kamu belum membayar Uang Kas HMSI bulan ${currentMonthName} (Rp 20.000). Yuk segera upload bukti pembayaran!`
+          `Halo ${currentUserName}, kamu belum membayar Uang Kas HMSI bulan ${currentMonthName} (Rp 20.000). Yuk segera lakukan pembayaran!`
         );
 
         if (showPopupIfUnpaidKas && !hasShownInitialKasPopup) {
@@ -765,7 +823,7 @@
         `Halo ${currentUserName}!\n\n` +
         `Sistem mendeteksi kamu BELUM membayar Uang Kas bulan ${monthName} (Rp 20.000).\n` +
         `Status saat ini: ${statusText}.\n\n` +
-        `Silakan lakukan pembayaran dan unggah bukti transfer di menu Uang Kas.`;
+        `Silakan lakukan pembayaran (Tunai / Non-Tunai) di menu Uang Kas.`;
 
       modal.classList.add("active");
 
@@ -779,7 +837,7 @@
     }
 
     // =========================================================================
-    // 1. LAYAR LOGIN (MEMUAT logo-hmsi.png / logo_hmsi.png DARI REPO GITHUB)
+    // 1. LAYAR LOGIN
     // =========================================================================
     function showLoginScreen() {
       setScreenState("LOGIN", false);
@@ -834,12 +892,11 @@
           return;
         }
         toast("Menghubungkan ke Google Sheets HMSI...");
-        const req = {
+        ApiService.post({
           action: "login",
           username: u,
           password: p
-        };
-        ApiService.post(req, (res) => {
+        }, (res) => {
           if (res.status === "success" && res.user) {
             const userObj = res.user;
             currentUserId = optSmart(userObj, "id", "id_user");
@@ -872,7 +929,10 @@
         onDone = triggerInitialPopup;
         triggerInitialPopup = false;
       }
-      ApiService.post({ action: "getDashboardData" }, (res) => {
+      ApiService.post({
+        action: "getDashboardData",
+        _ts: Date.now()
+      }, (res) => {
         if (res.status === "success") {
           startingBalance = Number(res.startingBalance || 0);
           startingBalanceHistoryList = Array.isArray(res.startingBalanceHistory) ? res.startingBalanceHistory : [];
@@ -894,7 +954,7 @@
     }
 
     // =========================================================================
-    // 2. LAYAR DASHBOARD UTAMA (SESUAI HAK AKSES ROLE)
+    // 2. LAYAR DASHBOARD UTAMA
     // =========================================================================
     function showDashboardScreen(pushHistory = true) {
       setScreenState("DASHBOARD", pushHistory);
@@ -929,37 +989,20 @@
 
       const menuItems = [];
 
-      // 1. MENU ACCOUNTING: Super Admin, Ketua Organisasi, Wakahim, Bendahara
       if (isAccountingAccessRole()) {
         menuItems.push(["📊", "Accounting", () => showAccountingHubScreen()]);
       }
-
-      // 2. MENU UANG KAS: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["💵", "Uang Kas", () => showUangKasScreen()]);
-
-      // 3. MENU JADWAL PIKET: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["📆", "Jadwal Piket\n(Semua User)", () => showLihatJadwalPiketSemuaUserScreen()]);
-
-      // 4. MENU KELOLA JADWAL PIKET: Khusus Super Admin, Ketua Organisasi, Wakahim
       if (isFullAccessRole()) {
         menuItems.push(["📅", "Kelola Jadwal\nPiket", () => showKelolaJadwalPiketScreen()]);
       }
-
-      // 5. MENU ABSEN PIKET: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["📸", "Absen Piket\n(Live Cam)", () => showAbsenPiketScreen()]);
-
-      // 6. MENU RIWAYAT ABSEN PIKET SAYA: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["🗂️", "Riwayat Absen\nPiket Saya", () => showRiwayatAbsenPiketUserScreen()]);
-
-      // 7. MENU MONITORING PIKET: Khusus Super Admin, Ketua Organisasi, Wakahim
       if (isFullAccessRole()) {
         menuItems.push(["☑️", "Monitoring\nPiket", () => showMonitoringPiketScreen()]);
       }
-
-      // 8. MENU DENDA: Semua Role (Super Admin, Ketua Organisasi, Wakahim, Bendahara, User Biasa)
       menuItems.push(["⚠️", "Menu Denda\n(Rp 20.000)", () => showDendaScreen()]);
-
-      // 9. MENU USER SETTING & PASSWORD: Khusus Super Admin, Ketua Organisasi, Wakahim
       if (isFullAccessRole()) {
         menuItems.push(["⚙️", "User Setting\n& Password", () => showUserSettingScreen()]);
       }
@@ -969,7 +1012,7 @@
       const bottomBtnRow = document.createElement("div");
       bottomBtnRow.className = "btn-row";
       bottomBtnRow.appendChild(createSecondaryButton("🔄 Sinkronisasi Data & Cek Notifikasi", () => {
-        toast("Menyinkronkan data...");
+        toast("Menyinkronkan data realtime...");
         refreshAllDataAndShow(false, () => showDashboardScreen(false));
       }));
       bottomBtnRow.appendChild(createSecondaryButton("🚪 Keluar Akun (Logout)", () => showLoginScreen()));
@@ -1040,7 +1083,7 @@
         card.appendChild(pLbl);
       }
       if (!kasPaidOrPending) {
-        const kLbl = createLabel(`• 💵 Kamu BELUM membayar Uang Kas bulan ${currentMonthName} (Rp 20.000). Segera upload bukti bayar di menu Uang Kas.`, 13, COLOR_YELLOW, true);
+        const kLbl = createLabel(`• 💵 Kamu BELUM membayar Uang Kas bulan ${currentMonthName} (Rp 20.000). Segera lakukan pembayaran di menu Uang Kas.`, 13, COLOR_YELLOW, true);
         kLbl.style.cursor = "pointer";
         kLbl.onclick = () => showUangKasScreen();
         card.appendChild(kLbl);
@@ -1049,7 +1092,7 @@
     }
 
     // =========================================================================
-    // 2B. MENU: JADWAL PIKET (DITAMPILKAN KE SEMUA USER + PENGINGAT)
+    // 2B. MENU: JADWAL PIKET (SEMUA USER)
     // =========================================================================
     function showLihatJadwalPiketSemuaUserScreen() {
       setScreenState("LIHAT_JADWAL_PIKET_ALL");
@@ -1162,7 +1205,7 @@
     }
 
     // =========================================================================
-    // 3. HUB MODUL ACCOUNTING (6 ANAK MENU KOTAK 1:1 BERJEJER KE SAMPING)
+    // 3. HUB MODUL ACCOUNTING
     // =========================================================================
     function showAccountingHubScreen(pushHistory = true) {
       setScreenState("ACCOUNTING_HUB", pushHistory);
@@ -1191,7 +1234,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3A: KELOLA STARTING BALANCE + RIWAYAT & TANGGALNYA
+    // ANAK MENU ACCOUNTING 3A: KELOLA STARTING BALANCE (TERBARU DI ATAS + EDIT/HAPUS KHUSUS SUPER ADMIN)
     // -------------------------------------------------------------------------
     function showAccSubStartingBalance() {
       setScreenState("ACC_SUB_STARTING");
@@ -1265,13 +1308,16 @@
       }
 
       const historyCard = createCardLayout();
-      historyCard.appendChild(createLabel("📜 Riwayat Perubahan Starting Balance Sebelumnya", 17, COLOR_YELLOW, true));
+      historyCard.appendChild(createLabel("📜 Riwayat Perubahan Starting Balance (Terbaru di Atas)", 17, COLOR_YELLOW, true));
       historyCard.appendChild(createLabel("Mencatat seluruh mutasi manual, Uang Kas disetujui (+), Denda disetujui (+), dan Pengeluaran (-):", 12, COLOR_MUTED, false));
 
-      if (startingBalanceHistoryList.length === 0) {
+      const combinedLogs = [...startingBalanceHistoryList];
+      combinedLogs.sort((a, b) => String(b.tanggal || "").localeCompare(String(a.tanggal || "")));
+
+      if (combinedLogs.length === 0 && transactionsList.length <= 1) {
         historyCard.appendChild(createLabel("Belum ada riwayat perubahan Starting Balance yang tercatat.", 13, COLOR_MUTED, false));
       } else {
-        startingBalanceHistoryList.forEach((h) => {
+        combinedLogs.forEach((h) => {
           const tgl = h.tanggal || "-";
           const mode = h.mode || "Update";
           const prevBal = Number(h.previousBalance || 0);
@@ -1288,6 +1334,74 @@
           itemBox.appendChild(createLabel(`📅 Tanggal: ${tgl} (Oleh: ${by})`, 13, COLOR_YELLOW, true));
           itemBox.appendChild(createLabel(`Transaksi: ${mode} (${signSymbol}${formatRupiah(inpAmt)})`, 13, COLOR_TEXT, true));
           itemBox.appendChild(createLabel(`Saldo Sebelumnya: ${formatRupiah(prevBal)} ➔ Menjadi: ${formatRupiah(newBal)}`, 13, badgeColor, true));
+
+          // KHUSUS SUPER ADMIN: Tombol Edit & Hapus Riwayat Starting Balance
+          if (hasRole("Super Admin")) {
+            const adminRow = document.createElement("div");
+            adminRow.className = "btn-row";
+
+            const btnEditHist = createSecondaryButton("✏️ Edit Riwayat", () => {
+              const etMode = createInput("Keterangan / Mode");
+              etMode.value = mode;
+              const etPrev = createInput("Saldo Sebelumnya (Rp)", false, true);
+              etPrev.value = String(prevBal);
+              const etAmt = createInput("Nominal Transaksi (Rp)", false, true);
+              etAmt.value = String(inpAmt);
+              const etNew = createInput("Saldo Menjadi (Rp)", false, true);
+              etNew.value = String(newBal);
+
+              const formEls = [
+                createLabel("Keterangan:", 12, COLOR_MUTED, false),
+                etMode,
+                createLabel("Saldo Sebelumnya:", 12, COLOR_MUTED, false),
+                etPrev,
+                createLabel("Nominal Transaksi:", 12, COLOR_MUTED, false),
+                etAmt,
+                createLabel("Saldo Menjadi:", 12, COLOR_MUTED, false),
+                etNew
+              ];
+
+              showCustomFormDialog("Edit Riwayat Starting Balance", formEls, "Simpan", () => {
+                ApiService.post({
+                  action: "manageStartingBalanceHistory",
+                  subAction: "EDIT",
+                  targetTanggal: tgl,
+                  targetMode: mode,
+                  newMode: etMode.value.trim(),
+                  newPrevBalance: etPrev.value.trim(),
+                  newInputAmount: etAmt.value.trim(),
+                  newNewBalance: etNew.value.trim()
+                }, (res) => {
+                  toast(res.message || "Riwayat berhasil diubah");
+                  refreshAllDataAndShow(() => showAccSubStartingBalance());
+                });
+              });
+            });
+
+            const btnDelHist = createPrimaryButton("🗑️ Hapus", () => {
+              showCustomConfirmDialog(
+                "Hapus Riwayat Ini?",
+                `Hapus riwayat:\n${mode} (${tgl})?`,
+                "Ya, Hapus",
+                () => {
+                  ApiService.post({
+                    action: "manageStartingBalanceHistory",
+                    subAction: "DELETE",
+                    targetTanggal: tgl,
+                    targetMode: mode
+                  }, (res) => {
+                    toast(res.message || "Riwayat berhasil dihapus");
+                    refreshAllDataAndShow(() => showAccSubStartingBalance());
+                  });
+                }
+              );
+            });
+
+            adminRow.appendChild(btnEditHist);
+            adminRow.appendChild(btnDelHist);
+            itemBox.appendChild(adminRow);
+          }
+
           historyCard.appendChild(itemBox);
         });
       }
@@ -1360,10 +1474,11 @@
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3C: VERIFIKASI UANG KAS & DENDA
+    // ANAK MENU ACCOUNTING 3C: VERIFIKASI UANG KAS & DENDA (ANTI KLIK DUA KALI)
     // -------------------------------------------------------------------------
     function showAccSubVerification() {
       setScreenState("ACC_SUB_VERIF");
+      isSubmittingVerification = false;
       rootContainer.innerHTML = "";
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Menu Accounting", () => showAccountingHubScreen()));
@@ -1380,8 +1495,13 @@
           const bulan = optSmart(item, "Bulan", "bulan");
           const nom = Number(optSmart(item, "Nominal", "nominal")) || 20000;
           const bukti = optSmart(item, "URL_Bukti_Drive", "url_bukti_drive");
+          const catatan = optSmart(item, "Catatan_Bendahara", "catatan_bendahara");
+          const metodeInfo = (catatan.toLowerCase().includes("tunai") || bukti.toUpperCase().includes("TUNAI"))
+            ? "💵 TUNAI (Cash)"
+            : "💳 NON-TUNAI (Transfer/QRIS)";
+
           const card = createCardLayout();
-          card.appendChild(createVerificationRow("KAS", idKas, `UANG KAS: ${nama}\nBulan: ${bulan} • ${formatRupiah(nom)}`, bukti));
+          card.appendChild(createVerificationRow("KAS", idKas, `UANG KAS: ${nama}\nBulan: ${bulan} • ${formatRupiah(nom)}\nMetode: ${metodeInfo}`, bukti));
           rootContainer.appendChild(card);
         }
       });
@@ -1418,8 +1538,25 @@
       }
       const btnRow = document.createElement("div");
       btnRow.className = "btn-row";
-      const btnApprove = createPrimaryButton("✔ SETUJUI (+SALDO)", () => submitVerification(targetType, targetId, "APPROVE"));
-      const btnDecline = createSecondaryButton("✖ TOLAK", () => submitVerification(targetType, targetId, "DECLINE"));
+
+      const btnApprove = createPrimaryButton("✔ SETUJUI (+SALDO)", () => {
+        if (isSubmittingVerification) return;
+        isSubmittingVerification = true;
+        btnApprove.disabled = true;
+        btnDecline.disabled = true;
+        btnApprove.textContent = "⏳ Memproses...";
+        submitVerification(targetType, targetId, "APPROVE");
+      });
+
+      const btnDecline = createSecondaryButton("✖ TOLAK", () => {
+        if (isSubmittingVerification) return;
+        isSubmittingVerification = true;
+        btnApprove.disabled = true;
+        btnDecline.disabled = true;
+        btnDecline.textContent = "⏳ Memproses...";
+        submitVerification(targetType, targetId, "DECLINE");
+      });
+
       btnRow.appendChild(btnApprove);
       btnRow.appendChild(btnDecline);
       box.appendChild(btnRow);
@@ -1435,12 +1572,15 @@
         verifiedBy: currentUserName
       }, (res) => {
         toast(res.message || "Verifikasi berhasil");
-        refreshAllDataAndShow(() => showAccSubVerification());
+        refreshAllDataAndShow(() => {
+          isSubmittingVerification = false;
+          showAccSubVerification();
+        });
       });
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3D: CEK SIAPA YANG SUDAH & BELUM BAYAR UANG KAS
+    // ANAK MENU ACCOUNTING 3D: CEK STATUS KAS ANGGOTA
     // -------------------------------------------------------------------------
     function showAccSubMemberKasStatus() {
       setScreenState("ACC_SUB_MEMBER_KAS");
@@ -1516,7 +1656,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3E: PENGATURAN QRIS & REKENING BANK TERPISAH
+    // ANAK MENU ACCOUNTING 3E: PENGATURAN QRIS & REKENING BANK
     // -------------------------------------------------------------------------
     function showAccSubPaymentSettings() {
       setScreenState("ACC_SUB_PAYMENT");
@@ -1662,7 +1802,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // ANAK MENU ACCOUNTING 3F: BUKU KAS TERPADU & EXPORT PDF (FILTER BULAN & TAHUN)
+    // ANAK MENU ACCOUNTING 3F: BUKU KAS TERPADU & EXPORT PDF
     // -------------------------------------------------------------------------
     function showAccSubLedgerAndPdf() {
       setScreenState("ACC_SUB_LEDGER");
@@ -1788,7 +1928,7 @@
     }
 
     // =========================================================================
-    // 4. MODUL UANG KAS (AKSES SEMUA USER)
+    // 4. MODUL UANG KAS (TUNAI & NON-TUNAI + RIWAYAT FILTER PER USER LOGIN)
     // =========================================================================
     function showUangKasScreen() {
       setScreenState("UANG_KAS");
@@ -1801,14 +1941,20 @@
       const defaultMonthIdx = monthsList.findIndex((m) => m.toLowerCase() === getCurrentIndonesianMonthName().toLowerCase());
 
       const uploadCard = createCardLayout();
-      uploadCard.appendChild(createLabel("Form Upload Bukti Bayar Kas (Rp 20.000/Bulan)", 16, COLOR_YELLOW, true));
+      uploadCard.appendChild(createLabel("Form Pembayaran Uang Kas (Rp 20.000/Bulan)", 16, COLOR_YELLOW, true));
+
+      uploadCard.appendChild(createLabel("Pilih Bulan:", 13, COLOR_MUTED, false));
       const spBulan = createSpinner(monthsList);
       if (defaultMonthIdx >= 0) spBulan.selectedIndex = defaultMonthIdx;
 
-      let buktiKasB64 = "";
-      const tvStatusFoto = createLabel("Wajib upload foto bukti bayar", 12, COLOR_MUTED, false);
+      const metodeList = ["Non-Tunai (Transfer / QRIS)", "Tunai (Cash ke Bendahara)"];
+      uploadCard.appendChild(createLabel("Pilih Metode Pembayaran:", 13, COLOR_MUTED, false));
+      const spMetode = createSpinner(metodeList);
 
-      const btnPilihBukti = createSecondaryButton("📷 Pilih Foto Bukti Transfer", () => {
+      let buktiKasB64 = "";
+      const tvStatusFoto = createLabel("Wajib upload foto bukti bayar untuk Non-Tunai", 12, COLOR_MUTED, false);
+
+      const btnPilihBukti = createSecondaryButton("📷 Pilih Foto Bukti Transfer (Wajib)", () => {
         pickFromGallery((b64) => {
           buktiKasB64 = b64;
           tvStatusFoto.textContent = "✔ Foto Bukti Kas Siap Dikirim";
@@ -1816,61 +1962,148 @@
         });
       });
 
-      const btnKirimKas = createPrimaryButton("KIRIM BUKTI UANG KAS (RP 20.000)", () => {
+      spMetode.addEventListener("change", () => {
+        const isTunai = spMetode.selectedIndex === 1;
+        btnPilihBukti.textContent = isTunai
+          ? "📷 Upload Foto Bukti (Opsional untuk Tunai)"
+          : "📷 Pilih Foto Bukti Transfer (Wajib)";
         if (!buktiKasB64) {
-          toast("Wajib mengunggah foto bukti pembayaran!");
+          tvStatusFoto.textContent = isTunai
+            ? "Pembayaran Tunai tidak wajib foto, tetap menunggu ACC Bendahara."
+            : "Wajib upload foto bukti bayar untuk Non-Tunai";
+          tvStatusFoto.style.color = COLOR_MUTED;
+        }
+      });
+
+      const btnKirimKas = createPrimaryButton("KIRIM PENGAJUAN UANG KAS (RP 20.000)", () => {
+        const isTunai = spMetode.selectedIndex === 1;
+        const metodeLabel = isTunai ? "Tunai" : "Non-Tunai";
+        if (!isTunai && !buktiKasB64) {
+          toast("Pembayaran Non-Tunai wajib mengunggah foto bukti transfer!");
           return;
         }
+        btnKirimKas.disabled = true;
+        btnKirimKas.textContent = "⏳ Mengirim...";
         ApiService.post({
           action: "submitUangKas",
           userId: currentUserId,
           nama: currentUserName,
           bulan: spBulan.value,
           nominal: 20000,
+          metodePembayaran: metodeLabel,
           base64Image: buktiKasB64
         }, (res) => {
-          toast(res.message || "Bukti Uang Kas terkirim");
+          toast(res.message || "Pengajuan Uang Kas terkirim");
           refreshAllDataAndShow(() => showUangKasScreen());
         });
       });
 
       uploadCard.appendChild(spBulan);
+      uploadCard.appendChild(spMetode);
       uploadCard.appendChild(btnPilihBukti);
       uploadCard.appendChild(tvStatusFoto);
       uploadCard.appendChild(btnKirimKas);
       rootContainer.appendChild(uploadCard);
 
+      // RIWAYAT & STATUS UANG KAS KHUSUS USER YANG SEDANG LOGIN
       const listCard = createCardLayout();
-      listCard.appendChild(createLabel("Riwayat & Status Uang Kas per Bulan", 16, COLOR_YELLOW, true));
-      const spFilterBulan = createSpinner(monthsList);
-      if (defaultMonthIdx >= 0) spFilterBulan.selectedIndex = defaultMonthIdx;
-      const resultContainer = document.createElement("div");
+      listCard.appendChild(createLabel(`Riwayat & Status Uang Kas Saya (${currentUserName})`, 16, COLOR_YELLOW, true));
+      listCard.appendChild(createLabel("Filter berdasarkan bulan untuk melihat status pembayaran akun kamu:", 12, COLOR_MUTED, false));
 
-      function renderKasByMonth(selectedMonth) {
-        resultContainer.innerHTML = "";
-        let count = 0;
-        uangKasList.forEach((k) => {
+      const filterBulanOptions = ["Semua Bulan", ...monthsList];
+      const spFilterBulan = createSpinner(filterBulanOptions);
+      const resultContainer = document.createElement("div");
+      resultContainer.style.paddingTop = "8px";
+
+      function findMyKasForMonth(monthName) {
+        for (let i = uangKasList.length - 1; i >= 0; i--) {
+          const k = uangKasList[i];
+          const kUid = optSmart(k, "ID_User", "id_user");
+          const kNama = optSmart(k, "Nama", "nama");
           const kBulan = optSmart(k, "Bulan", "bulan");
-          if (kBulan.toLowerCase() === selectedMonth.toLowerCase()) {
-            count++;
-            const kNama = optSmart(k, "Nama", "nama");
-            const st = optSmart(k, "Status", "status");
-            const badgeColor = st.toLowerCase().includes("approved")
-              ? COLOR_GREEN
-              : st.toLowerCase().includes("declined")
-              ? COLOR_RED
-              : COLOR_YELLOW;
-            resultContainer.appendChild(createLabel(`• ${kNama} — Status: ${st}`, 14, badgeColor, true));
-            const urlBukti = optSmart(k, "URL_Bukti_Drive", "url_bukti_drive");
-            if (urlBukti && urlBukti.startsWith("http")) {
-              resultContainer.appendChild(createSecondaryButton(`Lihat Bukti Bayar (${kNama})`, () => {
-                window.open(urlBukti, "_blank");
-              }));
-            }
+          const isMine =
+            (currentUserId !== "" && kUid.toLowerCase() === currentUserId.toLowerCase()) ||
+            (currentUserName !== "" && kNama.toLowerCase() === currentUserName.toLowerCase());
+          if (isMine && kBulan.toLowerCase() === monthName.toLowerCase()) {
+            return k;
           }
-        });
-        if (count === 0) {
-          resultContainer.appendChild(createLabel(`Belum ada data pembayaran pada bulan ${selectedMonth}.`, 13, COLOR_MUTED, false));
+        }
+        return null;
+      }
+
+      function renderMyKasItem(monthName, k) {
+        const itemBox = document.createElement("div");
+        itemBox.className = "item-box";
+
+        if (k) {
+          const st = optSmart(k, "Status", "status") || "Pending";
+          const catatan = optSmart(k, "Catatan_Bendahara", "catatan_bendahara");
+          const tsUpdate = optSmart(k, "Timestamp_Update", "timestamp_update");
+          const urlBukti = optSmart(k, "URL_Bukti_Drive", "url_bukti_drive");
+
+          const badgeColor = st.toLowerCase().includes("approved")
+            ? COLOR_GREEN
+            : st.toLowerCase().includes("declined")
+            ? COLOR_RED
+            : COLOR_YELLOW;
+          const statusIcon = st.toLowerCase().includes("approved")
+            ? "✔"
+            : st.toLowerCase().includes("declined")
+            ? "❌"
+            : "⏳";
+
+          itemBox.appendChild(createLabel(`${statusIcon} Bulan ${monthName} — Status: ${st}`, 14, badgeColor, true));
+          if (catatan) {
+            itemBox.appendChild(createLabel(`Ket: ${catatan}`, 12, COLOR_TEXT, false));
+          }
+          if (tsUpdate) {
+            itemBox.appendChild(createLabel(`Update: ${tsUpdate}`, 11, COLOR_MUTED, false));
+          }
+          if (urlBukti && urlBukti.startsWith("http")) {
+            itemBox.appendChild(createSecondaryButton(`🔍 Lihat Bukti Bayar (${monthName})`, () => {
+              window.open(urlBukti, "_blank");
+            }));
+          }
+        } else {
+          const isCurrentMonth = monthName.toLowerCase() === getCurrentIndonesianMonthName().toLowerCase();
+          itemBox.appendChild(createLabel(
+            `• Bulan ${monthName} — Status: Belum Bayar (Rp 20.000)${isCurrentMonth ? " ⚠️" : ""}`,
+            14,
+            isCurrentMonth ? COLOR_RED : COLOR_MUTED,
+            isCurrentMonth
+          ));
+        }
+
+        resultContainer.appendChild(itemBox);
+      }
+
+      function renderKasByMonth(selectedOption) {
+        resultContainer.innerHTML = "";
+        if (selectedOption === "Semua Bulan") {
+          let countLunas = 0;
+          let countPending = 0;
+          let countBelum = 0;
+
+          monthsList.forEach((m) => {
+            const k = findMyKasForMonth(m);
+            const st = k ? optSmart(k, "Status", "status") : "";
+            if (st.toLowerCase().includes("approved")) countLunas++;
+            else if (st.toLowerCase().includes("pending")) countPending++;
+            else countBelum++;
+          });
+
+          const summaryBox = document.createElement("div");
+          summaryBox.className = "item-box";
+          summaryBox.style.marginBottom = "10px";
+          summaryBox.appendChild(createLabel(`📊 Rekap Uang Kas Kamu (${currentUserName}):`, 13, COLOR_YELLOW, true));
+          summaryBox.appendChild(createLabel(`✔ Lunas: ${countLunas} Bulan | ⏳ Pending: ${countPending} Bulan | ❗ Belum/Ditolak: ${countBelum} Bulan`, 12, COLOR_TEXT, false));
+          resultContainer.appendChild(summaryBox);
+
+          monthsList.forEach((m) => {
+            renderMyKasItem(m, findMyKasForMonth(m));
+          });
+        } else {
+          renderMyKasItem(selectedOption, findMyKasForMonth(selectedOption));
         }
       }
 
@@ -1878,7 +2111,7 @@
       listCard.appendChild(spFilterBulan);
       listCard.appendChild(resultContainer);
       rootContainer.appendChild(listCard);
-      renderKasByMonth(spFilterBulan.value);
+      renderKasByMonth(filterBulanOptions[0]);
     }
 
     function createPaymentInfoDisplayCard() {
@@ -1903,7 +2136,7 @@
     }
 
     // =========================================================================
-    // 5. MODUL KELOLA JADWAL PIKET (SUPER ADMIN / KETUA ORGANISASI / WAKAHIM)
+    // 5. MODUL KELOLA JADWAL PIKET (ANTI DOUBLE DI HARI YANG SAMA)
     // =========================================================================
     function showKelolaJadwalPiketScreen() {
       setScreenState("JADWAL_PIKET");
@@ -1949,11 +2182,32 @@
         }
         const idx = spUser.selectedIndex >= 0 ? spUser.selectedIndex : 0;
         const uObj = usersList[idx];
+        const targetUid = getUserIdSmart(uObj);
+        const targetNama = getUserNameSmart(uObj);
+
+        // Cegah duplikasi orang yang sama pada tanggal yang sama
+        for (let i = 0; i < jadwalPiketList.length; i++) {
+          const j = jadwalPiketList[i];
+          const jTgl = normalizeDateString(optSmart(j, "Tanggal_Piket", "tanggal_piket", "Tanggal"));
+          const jUid = optSmart(j, "ID_User", "id_user");
+          const jNama = optSmart(j, "Nama", "nama");
+          if (
+            jTgl === selectedDateStr &&
+            (jUid.toLowerCase() === targetUid.toLowerCase() || jNama.toLowerCase() === targetNama.toLowerCase())
+          ) {
+            toast(`⚠️ ${targetNama} sudah terjadwal piket pada tanggal ${selectedDateStr}!`);
+            return;
+          }
+        }
+
+        btnSimpanJadwal.disabled = true;
+        btnSimpanJadwal.textContent = "⏳ Menyimpan...";
+
         ApiService.post({
           action: "saveJadwalPiket",
           tanggalPiket: selectedDateStr,
-          userId: getUserIdSmart(uObj),
-          nama: getUserNameSmart(uObj),
+          userId: targetUid,
+          nama: targetNama,
           divisi: getUserDivisiSmart(uObj),
           createdBy: currentUserName
         }, (res) => {
@@ -2015,7 +2269,7 @@
     }
 
     // =========================================================================
-    // 6. MODUL ABSENSI PIKET (PRATINJAU WATERMARK TIMESTAMP/GPS + TOMBOL KIRIM ABSEN)
+    // 6. MODUL ABSENSI PIKET (LIVE CAM + WATERMARK TIMESTAMP & GPS)
     // =========================================================================
     function showAbsenPiketScreen() {
       setScreenState("ABSEN_PIKET");
@@ -2216,7 +2470,7 @@
     }
 
     // =========================================================================
-    // 6B. MENU: RIWAYAT ABSEN PIKET SAYA (FILTER BULAN & TAHUN, AKSES SEMUA USER)
+    // 6B. MENU: RIWAYAT ABSEN PIKET SAYA
     // =========================================================================
     function showRiwayatAbsenPiketUserScreen() {
       setScreenState("RIWAYAT_PIKET_SAYA");
@@ -2332,7 +2586,7 @@
     }
 
     // =========================================================================
-    // 6C. MENU: MONITORING PIKET DENGAN CHECKLIST (KHUSUS WAKAHIM, KETUA, SUPER ADMIN)
+    // 6C. MENU: MONITORING PIKET (SEMBUNYIKAN TANGGAL LEWAT + SUPPORT HAPUS DATA)
     // =========================================================================
     function showMonitoringPiketScreen() {
       setScreenState("MONITORING_PIKET");
@@ -2340,7 +2594,7 @@
 
       rootContainer.appendChild(createSecondaryButton("← Kembali ke Dashboard", () => showDashboardScreen()));
       rootContainer.appendChild(createLabel("MONITORING PIKET (CHECKLIST)", 22, COLOR_YELLOW, true));
-      rootContainer.appendChild(createLabel("Akses Khusus Wakahim, Ketua Organisasi & Super Admin. Centang checklist untuk memvalidasi anggota piket:", 13, COLOR_MUTED, false));
+      rootContainer.appendChild(createLabel("Menampilkan jadwal piket aktif (hari ini & mendatang). Tanggal yang sudah lewat otomatis masuk ke Denda.", 13, COLOR_MUTED, false));
 
       const filterCard = createCardLayout();
       filterCard.appendChild(createLabel("Filter Periode Monitoring Bulan & Tahun", 16, COLOR_YELLOW, true));
@@ -2368,6 +2622,7 @@
         const selMCode = filterCalendarMonths[spMonth.selectedIndex][1];
         const selY = filterCalendarYears[spYear.selectedIndex];
         const yCode = selY === "Semua Tahun" ? "ALL" : selY;
+        const todayStr = getTodayFormatted();
 
         let countRow = 0;
         for (let i = absenPiketList.length - 1; i >= 0; i--) {
@@ -2375,6 +2630,10 @@
           const idAbsen = optSmart(a, "ID_Absen", "id_absen");
           const rawTgl = optSmart(a, "Tanggal_Piket", "tanggal_piket", "Tanggal");
           const normDate = normalizeDateString(rawTgl);
+
+          // Tanggal yang sudah lewat tidak ditampilkan (otomatis masuk denda)
+          if (normDate && normDate < todayStr) continue;
+
           const pYear = normDate.length >= 4 ? normDate.substring(0, 4) : "";
           const pMonth = normDate.length >= 7 ? normDate.substring(5, 7) : "";
 
@@ -2455,11 +2714,32 @@
             itemCard.appendChild(btnPhotoRow);
           }
 
+          // Support hapus data piket jika ada yang lupa / kendala / salah input
+          itemCard.appendChild(createSecondaryButton("🗑️ Hapus Data Piket Ini", () => {
+            showCustomConfirmDialog(
+              "Hapus Data Piket?",
+              `Hapus jadwal & log piket atas nama ${uName} pada tanggal ${normDate || rawTgl}?`,
+              "Ya, Hapus",
+              () => {
+                ApiService.post({
+                  action: "deletePiketData",
+                  idAbsen: idAbsen,
+                  tanggalPiket: normDate || rawTgl,
+                  userId: uid,
+                  nama: uName
+                }, (res) => {
+                  toast(res.message || "Data piket dihapus");
+                  refreshAllDataAndShow(() => showMonitoringPiketScreen());
+                });
+              }
+            );
+          }));
+
           listContainer.appendChild(itemCard);
         }
 
         if (countRow === 0) {
-          listContainer.appendChild(createLabel("Belum ada data jadwal/absen piket pada bulan & tahun ini.", 13, COLOR_MUTED, false));
+          listContainer.appendChild(createLabel("Tidak ada data monitoring piket aktif (hari ini & mendatang) pada periode ini.", 13, COLOR_MUTED, false));
         }
       }
 
@@ -2527,7 +2807,7 @@
     }
 
     // =========================================================================
-    // 8. MODUL USER SETTING (KHUSUS SUPER ADMIN, KETUA ORGANISASI, WAKAHIM)
+    // 8. MODUL USER SETTING (USER TERBARU DI PALING ATAS + SEARCH BAR)
     // =========================================================================
     function showUserSettingScreen() {
       setScreenState("USER_SETTING");
@@ -2540,7 +2820,7 @@
 
       const addUserCard = createCardLayout();
       addUserCard.appendChild(createLabel("➕ Buat Akun User Baru HMSI", 18, COLOR_YELLOW, true));
-      addUserCard.appendChild(createLabel("ID User akan dibuat otomatis (contoh: USR-11) dan langsung tersimpan ke tab Users di Google Sheets:", 12, COLOR_MUTED, false));
+      addUserCard.appendChild(createLabel("ID User akan dibuat otomatis dan langsung tersimpan ke tab Users di Google Sheets:", 12, COLOR_MUTED, false));
 
       const etNewNama = createInput("Nama Lengkap Anggota (contoh: Budi Santoso)");
       const etNewNim = createInput("NIM (contoh: 2024240030)", false, true);
@@ -2596,53 +2876,85 @@
       rootContainer.appendChild(addUserCard);
 
       const lblDaftar = createLabel(`DAFTAR ANGGOTA TERDAFTAR (${usersList.length} AKUN)`, 16, COLOR_YELLOW, true);
-      lblDaftar.style.padding = "6px 2px 10px 2px";
+      lblDaftar.style.padding = "6px 2px 6px 2px";
       rootContainer.appendChild(lblDaftar);
+
+      const etSearchUser = createInput("🔍 Cari nama, username, NIM, atau divisi...");
+      etSearchUser.style.marginBottom = "12px";
+      rootContainer.appendChild(etSearchUser);
 
       const usersGridContainer = document.createElement("div");
       usersGridContainer.className = "users-grid";
+      rootContainer.appendChild(usersGridContainer);
 
-      usersList.forEach((u) => {
-        const uid = getUserIdSmart(u);
-        const uName = getUserNameSmart(u);
-        const uDiv = getUserDivisiSmart(u);
-        const uUsername = getUsernameSmart(u);
-        const uOldPass = getOldPassSmart(u);
-        const uActivePass = getActivePassSmart(u);
-        const uRole = getUserRoleSmart(u);
+      function renderUserList(query) {
+        usersGridContainer.innerHTML = "";
+        const q = String(query || "").trim().toLowerCase();
+        let shownCount = 0;
 
-        const uCard = createCardLayout();
-        uCard.appendChild(createLabel(`${uName} (@${uUsername})`, 16, COLOR_YELLOW, true));
-        uCard.appendChild(createLabel(`ID: ${uid} | Jabatan: ${uDiv}`, 13, COLOR_TEXT, false));
-        uCard.appendChild(createLabel(`Password Sebelumnya: ${uOldPass} | Password Aktif: ${uActivePass}`, 13, COLOR_GREEN, true));
+        // Loop terbalik: User terbaru yang baru ditambahkan muncul di PALING ATAS
+        for (let i = usersList.length - 1; i >= 0; i--) {
+          const u = usersList[i];
+          const uid = getUserIdSmart(u);
+          const uName = getUserNameSmart(u);
+          const uNim = optSmart(u, "NIM", "nim");
+          const uDiv = getUserDivisiSmart(u);
+          const uUsername = getUsernameSmart(u);
+          const uOldPass = getOldPassSmart(u);
+          const uActivePass = getActivePassSmart(u);
+          const uRole = getUserRoleSmart(u);
 
-        const spRole = createSpinner(roles);
-        const normalizedRole = uRole.toLowerCase() === "user basa" ? "User Biasa" : uRole;
-        const currentRoleIdx = roles.findIndex((r) => r.toLowerCase() === normalizedRole.toLowerCase());
-        if (currentRoleIdx >= 0) spRole.selectedIndex = currentRoleIdx;
+          if (q !== "") {
+            const searchable = `${uid} ${uName} ${uNim} ${uDiv} ${uUsername} ${uRole}`.toLowerCase();
+            if (!searchable.includes(q)) continue;
+          }
 
-        const etNewPass = createInput("Masukkan Password Baru (kosongkan jika tetap)");
+          shownCount++;
+          const uCard = createCardLayout();
+          uCard.appendChild(createLabel(`${uName} (@${uUsername})`, 16, COLOR_YELLOW, true));
+          uCard.appendChild(createLabel(`ID: ${uid} | NIM: ${uNim} | Jabatan: ${uDiv}`, 13, COLOR_TEXT, false));
+          uCard.appendChild(createLabel(`Password Sebelumnya: ${uOldPass} | Password Aktif: ${uActivePass}`, 13, COLOR_GREEN, true));
 
-        const btnSaveUser = createPrimaryButton(`💾 Update Akun ${uName}`, () => {
-          ApiService.post({
-            action: "updateUserSetting",
-            targetUserId: uid,
-            targetUserName: uName,
-            newRole: spRole.value,
-            newPassword: etNewPass.value.trim()
-          }, (res) => {
-            toast(res.message || "Data user diperbarui");
-            refreshAllDataAndShow(() => showUserSettingScreen());
+          const spRole = createSpinner(roles);
+          const normalizedRole = uRole.toLowerCase() === "user basa" ? "User Biasa" : uRole;
+          const currentRoleIdx = roles.findIndex((r) => r.toLowerCase() === normalizedRole.toLowerCase());
+          if (currentRoleIdx >= 0) spRole.selectedIndex = currentRoleIdx;
+
+          const etNewPass = createInput("Masukkan Password Baru (kosongkan jika tetap)");
+
+          const btnSaveUser = createPrimaryButton(`💾 Update Akun ${uName}`, () => {
+            ApiService.post({
+              action: "updateUserSetting",
+              targetUserId: uid,
+              targetUserName: uName,
+              newRole: spRole.value,
+              newPassword: etNewPass.value.trim()
+            }, (res) => {
+              toast(res.message || "Data user diperbarui");
+              refreshAllDataAndShow(() => showUserSettingScreen());
+            });
           });
-        });
 
-        uCard.appendChild(spRole);
-        uCard.appendChild(etNewPass);
-        uCard.appendChild(btnSaveUser);
-        usersGridContainer.appendChild(uCard);
+          uCard.appendChild(spRole);
+          uCard.appendChild(etNewPass);
+          uCard.appendChild(btnSaveUser);
+          usersGridContainer.appendChild(uCard);
+        }
+
+        lblDaftar.textContent = q === ""
+          ? `DAFTAR ANGGOTA TERDAFTAR (${usersList.length} AKUN)`
+          : `HASIL PENCARIAN: ${shownCount} AKUN DITEMUKAN`;
+
+        if (shownCount === 0) {
+          usersGridContainer.appendChild(createLabel(`User dengan kata kunci "${query}" tidak ditemukan.`, 13, COLOR_MUTED, false));
+        }
+      }
+
+      etSearchUser.addEventListener("input", () => {
+        renderUserList(etSearchUser.value);
       });
 
-      rootContainer.appendChild(usersGridContainer);
+      renderUserList("");
     }
 
     // =========================================================================
@@ -2861,7 +3173,7 @@
     }
 
     // =========================================================================
-    // HELPER PINTAR CASE-INSENSITIVE & NORMALISASI TANGGAL (100% SAMA DENGAN ANDROID)
+    // HELPER PINTAR CASE-INSENSITIVE & NORMALISASI TANGGAL
     // =========================================================================
     function optSmart(obj, ...candidates) {
       if (!obj || typeof obj !== "object") return "";
@@ -2953,7 +3265,7 @@
     }
 
     // =========================================================================
-    // HELPER UI BUILDER (KOTAK MENU 1:1 BERJEJER HORIZONTAL)
+    // HELPER UI BUILDER
     // =========================================================================
     function createSquareGridMenu(items) {
       const grid = document.createElement("div");
